@@ -2,16 +2,16 @@
 
 This repo is used to host the api documentation of coly. 
 
-Github pages works by publishing the contents of <username>.github.io to https://<username>.github.io/
+Github pages works by publishing the contents of [username].github.io to https://[username].github.io/
 
 By putting an index.html file in the root we can therefore host our own site. 
 
 Clone this repo and follow the steps below.
 
 
-### How to publish changes in our api docs
+### How to publish changes in our api-docs/github pages.
 
-**Let's keep things simple by simply writing in the markdown file coly-api.md, exporting it as html from the editor, then publishing.**
+**Let's keep things simple by writing in the markdown file coly-api.md, exporting it as html from a markdown editor, then publishing.**
 
 To do that, follow these **steps**:
 
@@ -34,8 +34,8 @@ To do that, follow these **steps**:
 There are plenty of ways around this manual step. Two examples I've considered is:
 
 * Setting up a jekyll static site generator that converts the .md files for us. This is a recommended approach for github pages. See instructional video [Here](https://www.youtube.com/watch?v=VDOyjwWPKs4).
-* Import the .md file using zero-md, as suggested in [this post](https://stackoverflow.com/questions/37770620/how-to-include-markdown-md-files-inside-html-files). 
+* Import the .md file straight into index.html using zero-md, as suggested in [this post](https://stackoverflow.com/questions/37770620/how-to-include-markdown-md-files-inside-html-files). 
 
-However, for now that might be a bit overkill since we only have a single file to care about. It's also not always possible to the formatting to be as nice. For example code snippets with highlighting, and mermaid graphs might not be supported.
+However, for now that might be a bit overkill since we only have a single file to care about. It's also not always possible to the formatting to be as nice. For example code snippets with highlighting, and mermaid graphs might not be supported, zero-md for instance removes formatting completely.
 
 Let's consider the above examples if we would ever need them in the future.
