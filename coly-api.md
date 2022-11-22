@@ -8,10 +8,10 @@ Table of contents:
 * [Description](#description_link)
 * [API](#api_link)
   * [`Authentication`](#api_authentication_link)
-  * [`Assignments`](#api_assignments_link)
-  * [`Groups`](#api_groups_link)
-  * [`Match`](#api_match_link)
   * [`Persons`](#api_persons_link)
+  * [`Groups`](#api_groups_link)
+  * [`Assignments`](#api_assignments_link)
+  * [`Match`](#api_match_link)
 
 ---
 
