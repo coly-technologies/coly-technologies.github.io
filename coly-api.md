@@ -10,9 +10,6 @@ Table of contents:
   * [`Groups`](#api_groups_link)
   * [`Match`](#api_match_link)
   * [`Persons`](#api_persons_link)
-  * [`Profile`](#api_profile_link)
-  * [`Psychometry`](#api_psychometry_link)
-
 ---
 
 #### Introduction...<a name="intro_link"></a>
@@ -28,6 +25,7 @@ This page describes what's possible to build with the different tools provided a
 Our data models have several types(or layers if you will) which define the way we approach. Simply speaking data lifecycle reveals steps and actions that should be made to reach them. 
 
 Any model could be eather `public`, or `private`:
+
 - `public` means that it's accessible from outside(any api consumers like: frontend  applications, client services, widgets, etc).
 - `private` means that such model would be unreachable from outside and is being used solely by system internals. Usually used to extends [primary models](#primary-models) with computed data.
 
@@ -37,13 +35,14 @@ graph LR;
   Group & Person <--- Label
   Person --> PsychometricTest
 ```
+
 *Diagram1: Visualisation of model dependencies*
 
 ### Primary models
+
 Core level models, contains crucial data for system operations.
 
 #### `public` Person model
-%description%
 
 ```mermaid
 graph LR;
@@ -68,7 +67,6 @@ graph LR;
 
 
 #### `public` Group model
-%description%
 
 ```mermaid
 graph LR;
@@ -92,6 +90,7 @@ graph LR;
 - `Anonimised` - record is being stripped from personal or any sensitive information. Futher access intendded solely for ML training unit.
 
 #### `public` Assignment model
+
 %description%
 
 %mermaid diagram%
@@ -108,98 +107,30 @@ https//me-api.coly.io
 
 ---
 
-<br/>
+&nbsp;
+
+&nbsp;
+
+&nbsp;
 
 * ### Authentication<a name="api_authentication_link"></a>
 
 <hr style="background: #0037A1; height: 7px">
 
-Receives request to add new user and returns the user id
+The `api-key` can be found or could be generated via settings page in `ColyMe Console` App.
+
+##### Request Header : 
 
 ```http
-POST /auth/register
-```
-
-##### Example request body :
-
-```json
-{
-    "email": "user@example.com",
-    "password": "password"
-}
-```
-
-##### Response example :
-
-```html
-5e9c17b4-3eb5-49ac-8049-819ad7041311
-```
-
-<hr style="background: #0037A1">
-
-Authorizes via credentials
-
-```http
-POST /auth/sign-in
-```
-
-##### Example request body :
-
-```json
-{
-  "email": "user@example.com",
-  "password": "password"
-}
-```
-
-##### Response example:
-
-```json
-{
-  "refreshToken": "eyJjdHkiOiJKV1QiLCJlbmMiOiJBMjU2R0NNIiwiYWxnIjoiUlNBLU9BRVAifQ.",
-  "accessToken":"eyJraWQiOiJsNVRwSVFWVllrbzZLdU4wOENhSDBVQVBOOG4wRkwwTGxNZGt3d2NaY0VZPSIsImFsZyI6IlJTMjU2I",
-  "idToken": "eyJraWQiOiI5dWhMbyt4c0VKbEk5alNKU0hFQVkyOTFhZUY1QkRna2FzcVFcL3ppRmV3dz0iLCJhbGciOiJSUzI1NiJ9."
-}
-```
-<hr style="background: #0037A1">
-
-* Refreshes session consuming refresh token
-
-```http
-POST /auth/refresh
-```
-<hr style="background: #0037A1">
-
-* Completes user registration flow
-
-```http
-POST /auth/verification
-```
-<hr style="background: #0037A1">
-
-* Resents the verification flow
-
-```http
-POST /auth/verification/resend
-```
-<hr style="background: #0037A1">
-
-* Forgot password flow
-
-```http
-POST /auth/forgot-password
-```
-<hr style="background: #0037A1">
-
-* Change password flow
-
-```http
-POST /auth/change-password
+Authorization: Application <api-key>
 ```
 <hr style="background: #0037A1; height: 7px">
-<br/>
 
+&nbsp;
 
+&nbsp;
+
+&nbsp;
 
 * ### Assignments<a name="api_assignments_link"></a>
 
@@ -210,6 +141,7 @@ POST /auth/change-password
 ```http
 POST /assignments
 ```
+
 ##### Example request body :
 
 ```json
@@ -218,6 +150,7 @@ POST /assignments
   "personId": "11131f6e-5654-4d72-bff0-b4d60b1c9b3a"
 }
 ```
+
 ##### Response example:
 
 ```json
@@ -231,13 +164,17 @@ POST /assignments
   "personId": "11131f6e-5654-4d72-bff0-b4d60b1c9b3a"
 }
 ```
+
 <hr style="background: #0037A1">
+
+
 
 * Closes assignment for specified person
 
 ```http
 DELETE /assignments
 ```
+
 ##### Example request body :
 
 ```json
@@ -245,6 +182,7 @@ DELETE /assignments
   "personId": "11131f6e-5654-4d72-bff0-b4d60b1c9b3a"
 }
 ```
+
 ##### Response example:
 
 ```json
@@ -260,8 +198,13 @@ DELETE /assignments
 ```
 
 <hr style="background: #0037A1; height: 7px">
-<br/>
 
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
 
 * ### Groups<a name="api_groups_link"></a>
 
@@ -273,6 +216,7 @@ DELETE /assignments
 ```http
 GET /groups
 ```
+
 ##### Response example:
 
 ```json
@@ -319,13 +263,17 @@ GET /groups
   "isDone": true
 }
 ```
+
 <hr style="background: #0037A1">
+
+
 
 * Retrieves basic statistic over owner's created rows
 
 ```http
 GET /groups/status
 ```
+
 ##### Response example:
 
 ```json
@@ -335,13 +283,17 @@ GET /groups/status
   "total": 2
 }
 ```
+
 <hr style="background: #0037A1">
+
+
 
 * Retrieves single group record
 
 ```http
 GET /groups/:id
 ```
+
 ##### Response example:
 
 ```json
@@ -385,11 +337,14 @@ GET /groups/:id
 
 <hr style="background: #0037A1">
 
+
+
 * Creates new group record and returns it
 
 ```http
 POST /groups
 ```
+
 ##### Example request body :
 
 ```json
@@ -398,6 +353,7 @@ POST /groups
   "capacity": 4,
 }
 ```
+
 ##### Response example :
 
 ```json
@@ -415,13 +371,17 @@ POST /groups
   "traits": null
 }
 ```
+
 <hr style="background: #0037A1">
+
+
 
 * Updates group record fields and returns it updated
 
 ```http
 PUT /groups/:id
 ```
+
 ##### Example request body :
 
 ```json
@@ -430,6 +390,7 @@ PUT /groups/:id
   "capacity": 2,
 }
 ```
+
 ##### Response example : changed group capacity
 
 ```json
@@ -447,13 +408,17 @@ PUT /groups/:id
   "traits": null
 }
 ```
+
 <hr style="background: #0037A1">
+
+
 
 * Toggles group record archived status
 
 ```http
 PATCH /groups/:id/archivate
 ```
+
 ##### Response example : archive group
 
 ```json
@@ -474,11 +439,14 @@ PATCH /groups/:id/archivate
 
 <hr style="background: #0037A1">
 
+
+
 * Restores a group record from the archive
 
 ```http
 PATCH /groups/:id/restore
 ```
+
 ##### Response example : restore the archived group
 
 ```json
@@ -496,23 +464,38 @@ PATCH /groups/:id/restore
   "traits": null
 }
 ```
+
 <hr style="background: #0037A1">
 
+
+
 * Disabling group record
-**Note that only the archived records can be deleted**
+  **Note that only the archived records can be deleted**
 
 ```http
 DELETE /groups/:id
 ```
 
+##### Response example: person record deleted
+
+```http
+Status: 204 No content
+```
+
 <hr style="background: #0037A1; height: 7px">
-<br/>
 
 
+&nbsp;
+
+&nbsp;
+
+&nbsp;
 
 * ### Match<a name="api_match_link"></a>
 
 <hr style="background: #0037A1; height: 7px">
+
+
 
 * Operates matching between persons and groups
 
@@ -521,18 +504,25 @@ POST /something/to/our/rest/api
 ```
 
 <hr style="background: #0037A1; height: 7px">
-<br/>
 
+&nbsp;
 
+&nbsp;
 
-#### Persons<a name="api_persons_link"></a>
+&nbsp;
+
+* ### Persons<a name="api_persons_link"></a>
 
 <hr style="background: #0037A1; height: 7px">
+
+
 * Retrieves single person record
+
 
 ```http
 GET /persons/:id
 ```
+
 ##### Response example : 
 
 ```json
@@ -580,14 +570,19 @@ GET /persons/:id
   }
 }
 ```
+
 <hr style="background: #0037A1">
+
+
 
 * Retrieves basic statistic over owner's created rows
 
 ```http
 GET /persons/stats
 ```
+
 ##### Response example : 
+
 ```json
 {
   "pending": 2,
@@ -596,7 +591,10 @@ GET /persons/stats
   "assigned": 4
 }
 ```
+
 <hr style="background: #0037A1">
+
+
 
 * Retrieves list of persons records 
 
@@ -604,6 +602,7 @@ GET /persons/stats
 ```http
 GET /persons
 ```
+
 ##### Response example : 
 
 ```json
@@ -657,13 +656,17 @@ GET /persons
   "isDone": false
 }
 ```
+
 <hr style="background: #0037A1">
+
+
 
 * Retrieves person's test / profile url link
 
 ```http
 GET /persons/:id/link
 ```
+
 ##### Response example : 
 
 ```json
@@ -671,13 +674,17 @@ GET /persons/:id/link
   "link": "{{Base_url}}/auth/163326933613260363464326d203666626d223734643d243536353d25663661333131313"
 }
 ```
+
 <hr style="background: #0037A1">
+
+
 
 * Creates new persons record and returns it
 
 ```http
 POST /persons
 ```
+
 ##### Example request body :
 
 ```json
@@ -711,7 +718,10 @@ POST /persons
   "psychometry": null
 }
 ```
+
 <hr style="background: #0037A1">
+
+
 
 * Updates person record fields and returns it updated.
 * Also resends invitation if pending psycho test exist.
@@ -719,6 +729,7 @@ POST /persons
 ```http
 PUT /persons/:id
 ```
+
 ##### Example request body :
 
 ```json
@@ -755,19 +766,25 @@ PUT /persons/:id
 
 <hr style="background: #0037A1">
 
+
+
 * Creates psychometric test if none and send email request.
 
 ```http
 GET /persons/:id/invite
 ```
+
 <hr style="background: #0037A1">
+
+
 
 * Toggles person record archived status
 
 ```http
 PATCH /persons/:id/archivate
 ```
-#### Response example : archive person
+
+##### Response example : archive person
 
 ```json
 {
@@ -790,13 +807,17 @@ PATCH /persons/:id/archivate
   "psychometry": null
 }
 ```
+
 <hr style="background: #0037A1">
+
+
 
 * Restores a person record from the archive
 
 ```http
 PATCH /persons/:id/restore
 ```
+
 ##### Response example : restore the achived person
 
 ```json
@@ -820,56 +841,20 @@ PATCH /persons/:id/restore
   "psychometry": null
 }
 ```
+
 <hr style="background: #0037A1">
 
 * Disabling person record
+* **Note that only the archived records can be deleted**
 
 ```http
 DELETE /persons/:id
 ```
-**Note that only the archived records can be deleted**
 
-<hr style="background: #0037A1; height: 7px">
-<br/>
-
-
-
-#### Profile<a name="api_profile_link"></a>
-
-<hr style="background: #0037A1; height: 7px">
+##### Response example: person record deleted
 
 ```http
-GET /profile
-```
-<hr style="background: #0037A1">
-
-```http
-POST /profile/psychometry
-```
-<hr style="background: #0037A1">
-
-```http
-POST /profile/language
-```
-<hr style="background: #0037A1">
-
-```http
-POST /profile/extra
-```
-<hr style="background: #0037A1; height: 7px">
-<br/>
-
-
-
-#### Psychometry<a name="api_psychometry_link"></a>
-
-<hr style="background: #0037A1; height: 7px">
-
-```
-GET /something/from/our/rest/api
-```
-```
-POST /something/to/our/rest/api
+Status: 204 No content
 ```
 
 <hr style="background: #0037A1; height: 7px">
