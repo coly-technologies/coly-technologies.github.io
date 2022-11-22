@@ -1,4 +1,6 @@
-# COLY ME(Match Engine) API documentation 
+# COLY ME(Match Engine) API documentation
+
+<h6>v1.0</h6>
 
 Table of contents:
 
@@ -10,6 +12,7 @@ Table of contents:
   * [`Groups`](#api_groups_link)
   * [`Match`](#api_match_link)
   * [`Persons`](#api_persons_link)
+
 ---
 
 #### Introduction...<a name="intro_link"></a>
@@ -44,6 +47,8 @@ Core level models, contains crucial data for system operations.
 
 #### `public` Person model
 
+%description%
+
 ```mermaid
 graph LR;
   subgraph Assignment model
@@ -67,6 +72,8 @@ graph LR;
 
 
 #### `public` Group model
+
+%description%
 
 ```mermaid
 graph LR;
@@ -117,6 +124,8 @@ https//me-api.coly.io
 
 <hr style="background: #0037A1; height: 7px">
 
+
+
 The `api-key` can be found or could be generated via settings page in `ColyMe Console` App.
 
 ##### Request Header : 
@@ -124,386 +133,9 @@ The `api-key` can be found or could be generated via settings page in `ColyMe Co
 ```http
 Authorization: Application <api-key>
 ```
-<hr style="background: #0037A1; height: 7px">
-
-&nbsp;
-
-&nbsp;
-
-&nbsp;
-
-* ### Assignments<a name="api_assignments_link"></a>
 
 <hr style="background: #0037A1; height: 7px">
 
-* Creates single assignment
-
-```http
-POST /assignments
-```
-
-##### Example request body :
-
-```json
-{
-  "groupId": "3747a4ab-a385-4215-9084-5c1479019ba6",
-  "personId": "11131f6e-5654-4d72-bff0-b4d60b1c9b3a"
-}
-```
-
-##### Response example:
-
-```json
-{
-  "id": "e73c70d1-76a1-4038-b42e-10892b4f1857",
-  "createdAt": "2022-11-20T18:21:52.668Z",
-  "createdBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
-  "leftAt": null,
-  "isDirect": false,
-  "groupId": "3747a4ab-a385-4215-9084-5c1479019ba6",
-  "personId": "11131f6e-5654-4d72-bff0-b4d60b1c9b3a"
-}
-```
-
-<hr style="background: #0037A1">
-
-
-
-* Closes assignment for specified person
-
-```http
-DELETE /assignments
-```
-
-##### Example request body :
-
-```json
-{
-  "personId": "11131f6e-5654-4d72-bff0-b4d60b1c9b3a"
-}
-```
-
-##### Response example:
-
-```json
-{
-  "id": "e73c70d1-76a1-4038-b42e-10892b4f1857",
-  "createdAt": "2022-11-20T18:21:52.668Z",
-  "createdBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
-  "leftAt": "2022-11-20T18:23:41.404Z",
-  "isDirect": false,
-  "groupId": "3747a4ab-a385-4215-9084-5c1479019ba6",
-  "personId": "11131f6e-5654-4d72-bff0-b4d60b1c9b3a"
-}
-```
-
-<hr style="background: #0037A1; height: 7px">
-
-
-&nbsp;
-
-&nbsp;
-
-&nbsp;
-
-* ### Groups<a name="api_groups_link"></a>
-
-<hr style="background: #0037A1; height: 7px">
-
-
-* Retrieves list of group records
-
-```http
-GET /groups
-```
-
-##### Response example:
-
-```json
-{
-  "total": 1,
-  "list": [
-    {
-      "id": "3747a4ab-a385-4215-9084-5c1479019ba6",
-      "createdAt": "2022-10-31T15:24:51.730Z",
-      "createdBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
-      "updatedAt": "2022-11-01T16:01:03.485Z",
-      "updatedBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
-      "archivedAt": null,
-      "archivedBy": null,
-      "name": "Group A",
-      "image": null,
-      "capacity": 4,
-      "traits": {
-        "updatedAt": "2022-11-01T09:57:01.269Z",
-        "traits": {
-          "personality": {
-          "emotionalStability": 0,
-          "conscientiousness": 27.16966379985,
-          "agreeableness": 2.6192337764,
-          "extroversion": 85.3010164191,
-          "openness": 30.6880375293
-          },
-          "values": {
-            "selfDirection": 14.425332290850001,
-            "universalism": 15.324472243899999,
-            "achievement": 75.29319781075,
-            "benevolence": 20.60203283815,
-            "conformity": 36.2392494136,
-            "tradition": 46.1884284597,
-            "security": 45.19155590305,
-            "hedonism": 44.05785770135,
-            "activity": 63.6434714621,
-            "power": 93.6669272869
-          }
-        }
-      }
-    }
-  ],
-  "isDone": true
-}
-```
-
-<hr style="background: #0037A1">
-
-
-
-* Retrieves basic statistic over owner's created rows
-
-```http
-GET /groups/status
-```
-
-##### Response example:
-
-```json
-{
-  "available": 2,
-  "unavailable": 0,
-  "total": 2
-}
-```
-
-<hr style="background: #0037A1">
-
-
-
-* Retrieves single group record
-
-```http
-GET /groups/:id
-```
-
-##### Response example:
-
-```json
-{
-  "id": "3747a4ab-a385-4215-9084-5c1479019ba6",
-  "createdAt": "2022-10-31T15:24:51.730Z",
-  "createdBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
-  "updatedAt": "2022-11-01T16:01:03.485Z",
-  "updatedBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
-  "archivedAt": null,
-  "archivedBy": null,
-  "name": "Group A",
-  "image": null,
-  "capacity": 4,
-  "traits": {
-    "updatedAt": "2022-11-01T09:57:01.269Z",
-    "traits": {
-      "personality": {
-        "emotionalStability": 0,
-        "conscientiousness": 27.16966379985,
-        "agreeableness": 2.6192337764,
-        "extroversion": 85.3010164191,
-        "openness": 30.6880375293
-        },
-      "values": {
-        "selfDirection": 14.425332290850001,
-        "universalism": 15.324472243899999,
-        "achievement": 75.29319781075,
-        "benevolence": 20.60203283815,
-        "conformity": 36.2392494136,
-        "tradition": 46.1884284597,
-        "security": 45.19155590305,
-        "hedonism": 44.05785770135,
-        "activity": 63.6434714621,
-        "power": 93.6669272869
-      }
-    }
-  }
-}
-```
-
-<hr style="background: #0037A1">
-
-
-
-* Creates new group record and returns it
-
-```http
-POST /groups
-```
-
-##### Example request body :
-
-```json
-{
-  "name": "Group A",
-  "capacity": 4,
-}
-```
-
-##### Response example :
-
-```json
-{
-  "id": "8291747b-f415-4854-95ff-40c43919201c",
-  "createdAt": "2022-11-17T21:13:37.601Z",
-  "createdBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
-  "updatedAt": "2022-11-17T21:13:37.601Z",
-  "updatedBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
-  "archivedAt": null,
-  "archivedBy": null,
-  "name": "Group A",
-  "image": null,
-  "capacity": 4,
-  "traits": null
-}
-```
-
-<hr style="background: #0037A1">
-
-
-
-* Updates group record fields and returns it updated
-
-```http
-PUT /groups/:id
-```
-
-##### Example request body :
-
-```json
-{
-  "name": "Group A",
-  "capacity": 2,
-}
-```
-
-##### Response example : changed group capacity
-
-```json
-{
-  "id": "8291747b-f415-4854-95ff-40c43919201c",
-  "createdAt": "2022-11-17T21:13:37.601Z",
-  "createdBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
-  "updatedAt": "2022-11-17T21:13:37.601Z",
-  "updatedBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
-  "archivedAt": null,
-  "archivedBy": null,
-  "name": "Group A",
-  "image": null,
-  "capacity": 2,
-  "traits": null
-}
-```
-
-<hr style="background: #0037A1">
-
-
-
-* Toggles group record archived status
-
-```http
-PATCH /groups/:id/archivate
-```
-
-##### Response example : archive group
-
-```json
-{
-  "id": "8291747b-f415-4854-95ff-40c43919201c",
-  "createdAt": "2022-11-17T21:13:37.601Z",
-  "createdBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
-  "updatedAt": "2022-11-17T22:40:37.575Z",
-  "updatedBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
-  "archivedAt": "2022-11-17T22:42:26.613Z",
-  "archivedBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
-  "name": "Group TMZ",
-  "image": null,
-  "capacity": 2,
-  "traits": null
-}
-```
-
-<hr style="background: #0037A1">
-
-
-
-* Restores a group record from the archive
-
-```http
-PATCH /groups/:id/restore
-```
-
-##### Response example : restore the archived group
-
-```json
-{
-  "id": "8291747b-f415-4854-95ff-40c43919201c",
-  "createdAt": "2022-11-17T21:13:37.601Z",
-  "createdBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
-  "updatedAt": "2022-11-17T22:40:37.575Z",
-  "updatedBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
-  "archivedAt": null,
-  "archivedBy": null,
-  "name": "Group TMZ",
-  "image": null,
-  "capacity": 2,
-  "traits": null
-}
-```
-
-<hr style="background: #0037A1">
-
-
-
-* Disabling group record
-  **Note that only the archived records can be deleted**
-
-```http
-DELETE /groups/:id
-```
-
-##### Response example: person record deleted
-
-```http
-Status: 204 No content
-```
-
-<hr style="background: #0037A1; height: 7px">
-
-
-&nbsp;
-
-&nbsp;
-
-&nbsp;
-
-* ### Match<a name="api_match_link"></a>
-
-<hr style="background: #0037A1; height: 7px">
-
-
-
-* Operates matching between persons and groups
-
-```http
-POST /something/to/our/rest/api
-```
-
-<hr style="background: #0037A1; height: 7px">
 
 &nbsp;
 
@@ -515,8 +147,16 @@ POST /something/to/our/rest/api
 
 <hr style="background: #0037A1; height: 7px">
 
+#### Descripiton: 
 
-* Retrieves single person record
+The `Persons` entity is mainly refers to your tenets who are living in your property or users who are taking the `Psychometry` Test using our product.each individual person will have their `Personlity` and `Values` traits calculated after taking the test. And the score they get will play a key role when it comes to matching the individual to a certain group.
+
+---
+
+
+
+
+* Retrieves single person record, with all the detailed informations that you need.
 
 
 ```http
@@ -575,7 +215,11 @@ GET /persons/:id
 
 
 
-* Retrieves basic statistic over owner's created rows
+* Retrieves basic statistic over owner's created rows, such as:
+  * `Pending` indicates the `Persons` who received the `Psychometry Test` yet haven completed it.
+  * `Ready` indicates the `Persons` who has finished the test and ready to be matched 
+  * `Total` the total number of `Persons` 
+  * `Assigned` indicates tho `Persons` who has finished the test and have been assigned to a group.
 
 ```http
 GET /persons/stats
@@ -596,7 +240,7 @@ GET /persons/stats
 
 
 
-* Retrieves list of persons records 
+* Retrieves list of persons records, with the total number of `Persons` and their detailed informations. 
 
 
 ```http
@@ -661,7 +305,7 @@ GET /persons
 
 
 
-* Retrieves person's test / profile url link
+* Retrieves person's test / profile URL link. This URL link will take you to the `ColyMe Profile` App, if the `Psychometry Test` has been completed, the App will display `Personality`, `Values` scores plus a `Your advice` section which displays the `Challanges` the person may face, `Strenghts` of the person and a `Shared living advice` with useful tips for the person that can be refreshed with new tips while clicked the card.
 
 ```http
 GET /persons/:id/link
@@ -679,7 +323,7 @@ GET /persons/:id/link
 
 
 
-* Creates new persons record and returns it
+* Creates new persons record and returns it, it requires `email` , `firstname`, `lastname` in order to create a `Persons` record.
 
 ```http
 POST /persons
@@ -844,6 +488,8 @@ PATCH /persons/:id/restore
 
 <hr style="background: #0037A1">
 
+
+
 * Disabling person record
 * **Note that only the archived records can be deleted**
 
@@ -855,6 +501,435 @@ DELETE /persons/:id
 
 ```http
 Status: 204 No content
+```
+
+<hr style="background: #0037A1; height: 7px">
+
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+* ### Groups<a name="api_groups_link"></a>
+
+<hr style="background: #0037A1; height: 7px">
+
+#### Descripiton: 
+
+
+The `Groups` entity is a collection of `Persons`, usually refers to group of people who lives in a hub. A non-empty group will have a calculated average `Personality` and `Values` scale that can be used to matching a incoming person, and the matching score will indicate the compatibility of the person to the group.
+
+---
+
+
+
+
+* Retrieves list of `groups` records, with the total number of groups and the detailed information about each group.
+
+```http
+GET /groups
+```
+
+##### Response example:
+
+```json
+{
+  "total": 1,
+  "list": [
+    {
+      "id": "3747a4ab-a385-4215-9084-5c1479019ba6",
+      "createdAt": "2022-10-31T15:24:51.730Z",
+      "createdBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
+      "updatedAt": "2022-11-01T16:01:03.485Z",
+      "updatedBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
+      "archivedAt": null,
+      "archivedBy": null,
+      "name": "Group A",
+      "image": null,
+      "capacity": 4,
+      "traits": {
+        "updatedAt": "2022-11-01T09:57:01.269Z",
+        "traits": {
+          "personality": {
+          "emotionalStability": 0,
+          "conscientiousness": 27.16966379985,
+          "agreeableness": 2.6192337764,
+          "extroversion": 85.3010164191,
+          "openness": 30.6880375293
+          },
+          "values": {
+            "selfDirection": 14.425332290850001,
+            "universalism": 15.324472243899999,
+            "achievement": 75.29319781075,
+            "benevolence": 20.60203283815,
+            "conformity": 36.2392494136,
+            "tradition": 46.1884284597,
+            "security": 45.19155590305,
+            "hedonism": 44.05785770135,
+            "activity": 63.6434714621,
+            "power": 93.6669272869
+          }
+        }
+      }
+    }
+  ],
+  "isDone": true
+}
+```
+
+<hr style="background: #0037A1">
+
+
+
+* Retrieves basic statistic over owner's created rows, such as :
+  * `Avalable` the number of groups with empty spots
+  * `Unavailable` the number of groups that are full
+  * `Total` the total number of groups
+
+```http
+GET /groups/status
+```
+
+##### Response example:
+
+```json
+{
+  "available": 2,
+  "unavailable": 0,
+  "total": 2
+}
+```
+
+<hr style="background: #0037A1">
+
+
+
+* Retrieves single group record
+
+```http
+GET /groups/:id
+```
+
+##### Response example:
+
+```json
+{
+  "id": "3747a4ab-a385-4215-9084-5c1479019ba6",
+  "createdAt": "2022-10-31T15:24:51.730Z",
+  "createdBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
+  "updatedAt": "2022-11-01T16:01:03.485Z",
+  "updatedBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
+  "archivedAt": null,
+  "archivedBy": null,
+  "name": "Group A",
+  "image": null,
+  "capacity": 4,
+  "traits": {
+    "updatedAt": "2022-11-01T09:57:01.269Z",
+    "traits": {
+      "personality": {
+        "emotionalStability": 0,
+        "conscientiousness": 27.16966379985,
+        "agreeableness": 2.6192337764,
+        "extroversion": 85.3010164191,
+        "openness": 30.6880375293
+        },
+      "values": {
+        "selfDirection": 14.425332290850001,
+        "universalism": 15.324472243899999,
+        "achievement": 75.29319781075,
+        "benevolence": 20.60203283815,
+        "conformity": 36.2392494136,
+        "tradition": 46.1884284597,
+        "security": 45.19155590305,
+        "hedonism": 44.05785770135,
+        "activity": 63.6434714621,
+        "power": 93.6669272869
+      }
+    }
+  }
+}
+```
+
+<hr style="background: #0037A1">
+
+
+
+* Creates new group record and returns it. The end-point requires a groups name and the preferred capacity for the group.
+
+```http
+POST /groups
+```
+
+##### Example request body :
+
+```json
+{
+  "name": "Group A",
+  "capacity": 4,
+}
+```
+
+##### Response example :
+
+```json
+{
+  "id": "8291747b-f415-4854-95ff-40c43919201c",
+  "createdAt": "2022-11-17T21:13:37.601Z",
+  "createdBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
+  "updatedAt": "2022-11-17T21:13:37.601Z",
+  "updatedBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
+  "archivedAt": null,
+  "archivedBy": null,
+  "name": "Group A",
+  "image": null,
+  "capacity": 4,
+  "traits": null
+}
+```
+
+<hr style="background: #0037A1">
+
+
+
+* Updates group record fields and returns it updated, you can alter the name and the capacity of the group record that you created.
+
+```http
+PUT /groups/:id
+```
+
+##### Example request body :
+
+```json
+{
+  "name": "Group A",
+  "capacity": 2,
+}
+```
+
+##### Response example : changed group capacity
+
+```json
+{
+  "id": "8291747b-f415-4854-95ff-40c43919201c",
+  "createdAt": "2022-11-17T21:13:37.601Z",
+  "createdBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
+  "updatedAt": "2022-11-17T21:13:37.601Z",
+  "updatedBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
+  "archivedAt": null,
+  "archivedBy": null,
+  "name": "Group A",
+  "image": null,
+  "capacity": 2,
+  "traits": null
+}
+```
+
+<hr style="background: #0037A1">
+
+
+
+* Toggles group record archived status.
+
+```http
+PATCH /groups/:id/archivate
+```
+
+##### Response example : archive group
+
+```json
+{
+  "id": "8291747b-f415-4854-95ff-40c43919201c",
+  "createdAt": "2022-11-17T21:13:37.601Z",
+  "createdBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
+  "updatedAt": "2022-11-17T22:40:37.575Z",
+  "updatedBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
+  "archivedAt": "2022-11-17T22:42:26.613Z",
+  "archivedBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
+  "name": "Group TMZ",
+  "image": null,
+  "capacity": 2,
+  "traits": null
+}
+```
+
+<hr style="background: #0037A1">
+
+
+
+* Restores a group record from the archive
+
+```http
+PATCH /groups/:id/restore
+```
+
+##### Response example : restore the archived group
+
+```json
+{
+  "id": "8291747b-f415-4854-95ff-40c43919201c",
+  "createdAt": "2022-11-17T21:13:37.601Z",
+  "createdBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
+  "updatedAt": "2022-11-17T22:40:37.575Z",
+  "updatedBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
+  "archivedAt": null,
+  "archivedBy": null,
+  "name": "Group TMZ",
+  "image": null,
+  "capacity": 2,
+  "traits": null
+}
+```
+
+<hr style="background: #0037A1">
+
+
+
+* Disabling group record
+  **Note that only the archived records can be deleted**
+
+```http
+DELETE /groups/:id
+```
+
+##### Response example: group record deleted
+
+```http
+Status: 204 No content
+```
+
+<hr style="background: #0037A1; height: 7px">
+
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+* ### Assignments<a name="api_assignments_link"></a>
+
+<hr style="background: #0037A1; height: 7px">
+
+
+### Description:
+
+Assignments end-point is used for manging `assignments`, indicating the relation between `Persons` and `Groups` records. 
+
+---
+
+
+
+* Assigning `persons` records to `groups` . You would need both `groupId` and `personId` in order to create assignment records.
+
+```http
+POST /assignments
+```
+
+##### Example request body :
+
+```json
+{
+  "groupId": "3747a4ab-a385-4215-9084-5c1479019ba6",
+  "personId": "11131f6e-5654-4d72-bff0-b4d60b1c9b3a"
+}
+```
+
+##### Response example:
+
+```json
+{
+  "id": "e73c70d1-76a1-4038-b42e-10892b4f1857",
+  "createdAt": "2022-11-20T18:21:52.668Z",
+  "createdBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
+  "leftAt": null,
+  "isDirect": false,
+  "groupId": "3747a4ab-a385-4215-9084-5c1479019ba6",
+  "personId": "11131f6e-5654-4d72-bff0-b4d60b1c9b3a"
+}
+```
+
+<hr style="background: #0037A1">
+
+
+
+* Closes assignment for specified person, here you are basically deleting or removing the assignment records. 
+
+```http
+DELETE /assignments
+```
+
+##### Example request body :
+
+```json
+{
+  "personId": "11131f6e-5654-4d72-bff0-b4d60b1c9b3a"
+}
+```
+
+##### Response example:
+
+```json
+{
+  "id": "e73c70d1-76a1-4038-b42e-10892b4f1857",
+  "createdAt": "2022-11-20T18:21:52.668Z",
+  "createdBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
+  "leftAt": "2022-11-20T18:23:41.404Z",
+  "isDirect": false,
+  "groupId": "3747a4ab-a385-4215-9084-5c1479019ba6",
+  "personId": "11131f6e-5654-4d72-bff0-b4d60b1c9b3a"
+}
+```
+
+<hr style="background: #0037A1; height: 7px">
+
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+* ### Match<a name="api_match_link"></a>
+
+<hr style="background: #0037A1; height: 7px">
+
+
+#### Description:
+
+The Match end-point is used to operate "one to many" matching between `Persons` and `Groups` entities and getting the final matching score which indicates the compatibility between the two entity.  
+
+---
+
+
+
+* Operates matching between persons and groups
+  * `One` indicates the single entity matching to other
+  * `Many` indicates the array of entity being matched 
+  * `Type` indicates the type of entity getting matched, `0` as the person, `1` as the group
+  * `Id` as the id of the entity 
+
+```http
+POST /match
+```
+
+##### Example request body:
+
+```json
+{
+  "one": {
+    "type": 0,
+    "id": "11131f6e-5654-4d72-bff0-b4d60b1c9b3a"
+  },
+  "many": [
+    {
+      "type": 1,
+      "id": "3747a4ab-a385-4215-9084-5c1479019ba6"
+    }
+  ]
+}
 ```
 
 <hr style="background: #0037A1; height: 7px">
