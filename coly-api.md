@@ -47,8 +47,6 @@ Core level models, contains crucial data for system operations.
 
 #### `public` Person model
 
-%description%
-
 ```mermaid
 graph LR;
   subgraph Assignment model
@@ -72,8 +70,6 @@ graph LR;
 
 
 #### `public` Group model
-
-%description%
 
 ```mermaid
 graph LR;
@@ -125,7 +121,6 @@ https//me-api.coly.io
 <hr style="background: #0037A1; height: 7px">
 
 
-
 The `api-key` can be found or could be generated via settings page in `ColyMe Console` App.
 
 ##### Request Header : 
@@ -136,7 +131,6 @@ Authorization: Application <api-key>
 
 <hr style="background: #0037A1; height: 7px">
 
-
 &nbsp;
 
 &nbsp;
@@ -146,7 +140,6 @@ Authorization: Application <api-key>
 * ### Persons<a name="api_persons_link"></a>
 
 <hr style="background: #0037A1; height: 7px">
-
 #### Descripiton: 
 
 The `Persons` entity is mainly refers to your tenets who are living in your property or users who are taking the `Psychometry` Test using our product.each individual person will have their `Personlity` and `Values` traits calculated after taking the test. And the score they get will play a key role when it comes to matching the individual to a certain group.
@@ -214,7 +207,6 @@ GET /persons/:id
 <hr style="background: #0037A1">
 
 
-
 * Retrieves basic statistic over owner's created rows, such as:
   * `Pending` indicates the `Persons` who received the `Psychometry Test` yet haven completed it.
   * `Ready` indicates the `Persons` who has finished the test and ready to be matched 
@@ -237,7 +229,6 @@ GET /persons/stats
 ```
 
 <hr style="background: #0037A1">
-
 
 
 * Retrieves list of persons records, with the total number of `Persons` and their detailed informations. 
@@ -304,7 +295,6 @@ GET /persons
 <hr style="background: #0037A1">
 
 
-
 * Retrieves person's test / profile URL link. This URL link will take you to the `ColyMe Profile` App, if the `Psychometry Test` has been completed, the App will display `Personality`, `Values` scores plus a `Your advice` section which displays the `Challanges` the person may face, `Strenghts` of the person and a `Shared living advice` with useful tips for the person that can be refreshed with new tips while clicked the card.
 
 ```http
@@ -322,14 +312,13 @@ GET /persons/:id/link
 <hr style="background: #0037A1">
 
 
-
 * Creates new persons record and returns it, it requires `email` , `firstname`, `lastname` in order to create a `Persons` record.
 
 ```http
 POST /persons
 ```
 
-##### Example request body :
+##### Request body :
 
 ```json
 {
@@ -352,7 +341,7 @@ POST /persons
   "archivedBy": null,
   "firstname": "James",
   "middlename": "",
-  "lastname": "Dean",
+  "lastname": "Bond",
   "email": "person@example.com",
   "gender": null,
   "language": null,
@@ -366,7 +355,6 @@ POST /persons
 <hr style="background: #0037A1">
 
 
-
 * Updates person record fields and returns it updated.
 * Also resends invitation if pending psycho test exist.
 
@@ -374,7 +362,7 @@ POST /persons
 PUT /persons/:id
 ```
 
-##### Example request body :
+##### Request body :
 
 ```json
 {
@@ -411,7 +399,6 @@ PUT /persons/:id
 <hr style="background: #0037A1">
 
 
-
 * Creates psychometric test if none and send email request.
 
 ```http
@@ -419,7 +406,6 @@ GET /persons/:id/invite
 ```
 
 <hr style="background: #0037A1">
-
 
 
 * Toggles person record archived status
@@ -455,7 +441,6 @@ PATCH /persons/:id/archivate
 <hr style="background: #0037A1">
 
 
-
 * Restores a person record from the archive
 
 ```http
@@ -489,7 +474,6 @@ PATCH /persons/:id/restore
 <hr style="background: #0037A1">
 
 
-
 * Disabling person record
 * **Note that only the archived records can be deleted**
 
@@ -505,7 +489,6 @@ Status: 204 No content
 
 <hr style="background: #0037A1; height: 7px">
 
-
 &nbsp;
 
 &nbsp;
@@ -515,7 +498,6 @@ Status: 204 No content
 * ### Groups<a name="api_groups_link"></a>
 
 <hr style="background: #0037A1; height: 7px">
-
 #### Descripiton: 
 
 
@@ -582,7 +564,6 @@ GET /groups
 <hr style="background: #0037A1">
 
 
-
 * Retrieves basic statistic over owner's created rows, such as :
   * `Avalable` the number of groups with empty spots
   * `Unavailable` the number of groups that are full
@@ -603,7 +584,6 @@ GET /groups/status
 ```
 
 <hr style="background: #0037A1">
-
 
 
 * Retrieves single group record
@@ -656,14 +636,13 @@ GET /groups/:id
 <hr style="background: #0037A1">
 
 
-
 * Creates new group record and returns it. The end-point requires a groups name and the preferred capacity for the group.
 
 ```http
 POST /groups
 ```
 
-##### Example request body :
+##### Request body :
 
 ```json
 {
@@ -693,14 +672,13 @@ POST /groups
 <hr style="background: #0037A1">
 
 
-
 * Updates group record fields and returns it updated, you can alter the name and the capacity of the group record that you created.
 
 ```http
 PUT /groups/:id
 ```
 
-##### Example request body :
+##### Request body :
 
 ```json
 {
@@ -730,7 +708,6 @@ PUT /groups/:id
 <hr style="background: #0037A1">
 
 
-
 * Toggles group record archived status.
 
 ```http
@@ -756,7 +733,6 @@ PATCH /groups/:id/archivate
 ```
 
 <hr style="background: #0037A1">
-
 
 
 * Restores a group record from the archive
@@ -786,7 +762,6 @@ PATCH /groups/:id/restore
 <hr style="background: #0037A1">
 
 
-
 * Disabling group record
   **Note that only the archived records can be deleted**
 
@@ -799,9 +774,7 @@ DELETE /groups/:id
 ```http
 Status: 204 No content
 ```
-
 <hr style="background: #0037A1; height: 7px">
-
 
 &nbsp;
 
@@ -812,7 +785,6 @@ Status: 204 No content
 * ### Assignments<a name="api_assignments_link"></a>
 
 <hr style="background: #0037A1; height: 7px">
-
 
 ### Description:
 
@@ -828,7 +800,7 @@ Assignments end-point is used for manging `assignments`, indicating the relation
 POST /assignments
 ```
 
-##### Example request body :
+##### Request body :
 
 ```json
 {
@@ -854,14 +826,13 @@ POST /assignments
 <hr style="background: #0037A1">
 
 
-
 * Closes assignment for specified person, here you are basically deleting or removing the assignment records. 
 
 ```http
 DELETE /assignments
 ```
 
-##### Example request body :
+##### Request body :
 
 ```json
 {
@@ -882,9 +853,7 @@ DELETE /assignments
   "personId": "11131f6e-5654-4d72-bff0-b4d60b1c9b3a"
 }
 ```
-
 <hr style="background: #0037A1; height: 7px">
-
 
 &nbsp;
 
@@ -895,7 +864,6 @@ DELETE /assignments
 * ### Match<a name="api_match_link"></a>
 
 <hr style="background: #0037A1; height: 7px">
-
 
 #### Description:
 
@@ -915,7 +883,7 @@ The Match end-point is used to operate "one to many" matching between `Persons` 
 POST /match
 ```
 
-##### Example request body:
+##### Request body:
 
 ```json
 {
@@ -931,5 +899,15 @@ POST /match
   ]
 }
 ```
+
+##### Response example : Returns the matching score
+
+```json
+{
+    63.5
+}
+```
+
+ 
 
 <hr style="background: #0037A1; height: 7px">
