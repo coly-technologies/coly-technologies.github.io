@@ -1,36 +1,79 @@
-# COLY ME(Match Engine) API documentation
+# Coly ME (Match Engine) API documentation
 
-<h6>v1.0</h6>
+<hr style="background: #4C53FF; height: 5px">
 
-Table of contents:
+
+<h6>Version 1.0</h6>
+
+### Table of contents
 
 * [Introduction](#intro_link)
-* [Description](#description_link)
-* [API](#api_link)
-  * [`Authentication`](#api_authentication_link)
-  * [`Persons`](#api_persons_link)
-  * [`Groups`](#api_groups_link)
-  * [`Assignments`](#api_assignments_link)
-  * [`Match`](#api_match_link)
+* [Data Lifecycle Description](#description_link)
+* [API Endpoints](#api_link)
+  * [Authentication](#api_authentication_link)
+  * [Persons](#api_persons_link)
+    * [Create person](#create_person_link)
+    * [Get person information](#get_person_link)
+    * [Get a person unique test & profile link](#get_person_test_link)
+    * [Get stats of person list](#get_persons_stats_link)
+    * [Get list of persons](#get_persons_list_link)
+    * [Update person](#update_person_link)
+    * [Archive person](#archive_person_link)
+    * [Restore person from archive](#restore_person_link)
+    * [Delete person from archive](#delete_person_link)
+  * [Groups](#api_groups_link)
+    * [Create group](#create_group_link)
+    * [Get group information](#get_group_link)
+    * [Get stats of group list](#get_group_stats_link)
+    * [Get list of groups](#get_group_list_link)
+    * [Update group](#update_group_link)
+    * [Archive group](#archive_group_link)
+    * [Restore group from archive](#restore_group_link)
+    * [Delete group from archive](#delete_group_link)
+  * [Assignments](#api_assignments_link)
+    * [Assign person to group](#assign_person_group_link)
+    * [Remove person from group](#remove_person_group_link)
+  * [Match](#api_match_link)
 
----
-
-#### Introduction...<a name="intro_link"></a>
-
-Coly ME API Documentaion provides a descriptive information for developers to harness the power of ME Engine.
-
-This page describes what's possible to build with the different tools provided and APIs that are available on the platform, and how to get the access and the information for you to get started.
 
 
 
-#### `WIP` Data lifecycle Description<a name="description_link"></a>
 
-Our data models have several types(or layers if you will) which define the way we approach. Simply speaking data lifecycle reveals steps and actions that should be made to reach them. 
 
-Any model could be eather `public`, or `private`:
 
-- `public` means that it's accessible from outside(any api consumers like: frontend  applications, client services, widgets, etc).
-- `private` means that such model would be unreachable from outside and is being used solely by system internals. Usually used to extends [primary models](#primary-models) with computed data.
+## Introduction <a name="intro_link"></a>
+
+<hr style="background: #4C53FF; height: 4px">
+
+The Coly ME API Documentation provides descriptive information for developers who would like to integrate the functionality of Coly ME into their solution.
+
+The Coly ME engine is provided in four simple steps. 
+
+1. Create a person.
+2. Distribute the link to the person for the test and profile.
+3. Create a group and assign persons to it.
+4. Match.
+
+The order of the API endpoints is placed after the user flow above.
+
+Go to [API](#api_link) section to get started!
+
+
+
+
+
+
+
+## `WIP` Data Lifecycle Description<a name="description_link"></a>
+
+<hr style="background: #4C53FF; height: 4px">
+
+Our data models have several types(or layers) that define our approach. Simply speaking, the data lifecycle reveals steps and actions that should be taken to reach them. 
+
+Any model could be either public or private:
+
+- Public means it's accessible from outside(any API consumers like: frontend applications, client services, widgets, etc.).
+- Private means that such a model would be unreachable from outside and used solely by system internals. Usually used to extend [primary models](#primary-models) with computed data.
 
 ```mermaid
 graph LR;
@@ -41,11 +84,21 @@ graph LR;
 
 *Diagram1: Visualisation of model dependencies*
 
+
+
+
+
 ### Primary models
 
-Core level models, contains crucial data for system operations.
+<hr style="background: #4C53FF; height: 3px">
+
+Core-level models contain crucial data for system operations.
+
+
 
 #### `public` Person model
+
+<hr style="background: #FE6958; height: 2px">
 
 ```mermaid
 graph LR;
@@ -60,16 +113,19 @@ graph LR;
   LeftGroup ---> Closed
 ```
 
-- `Created` - creating empty person record
-- `Updated` - update client's payload data
-- `Joined2Group` - creates new [`Assignment`](#public-assignment-model) record thus linking [`Person`](#public-person-model) and [`Group`](#public-group-model)
-- `LeftGroup` - set's [`Assignment`](#public-assignment-model) record as inactive
-- `Archivated` - changes record access rights, thus making it `read-only`. No updates or any other actions then recover are available. At the end of predefined archive record life-time it moves to state `Disabled`
-- `Disabled` - restricts any futher public access to data. Life-time defined by coly data retention policy.
-- `Anonimised` - record is being stripped from personal or any sensitive information. Futher access intendded solely for ML training unit.
+- `Created` - Creating an empty person record.
+- `Updated` - Update client's payload data.
+- `Joined2Group` - Creates new [`Assignment`](#public-assignment-model) records thus linking [`Person`](#public-person-model) and [`Group`](#public-group-model).
+- `LeftGroup` - Set's [`Assignment`](#public-assignment-model) record as inactive
+- `Archivated` - Changes record access rights, thus making it `read-only`. No updates or any other actions than recovery are available. At the end of the predefined archive record lifetime, it moves to the state `Disabled`
+- `Disabled` - Restricts any further public access to data. Life-time defined by coly data retention policy.
+- `Anonimised` - Record is being stripped from personal or any sensitive information. Further access is intended solely for the ML training unit.
+
 
 
 #### `public` Group model
+
+<hr style="background: #FE6958; height: 2px">
 
 ```mermaid
 graph LR;
@@ -84,79 +140,134 @@ graph LR;
   PersonLeft ---> Closed
 ```
 
-- `Created` - creating empty group record
-- `Updated` - update client's payload data
-- `PersonJoined` - creates new [`Assignment`](#public-assignment-model) record thus linking [`Person`](#public-person-model) and [`Group`](#public-group-model)
-- `PersonLeft` - set's [`Assignment`](#public-assignment-model) record as inactive
-- `Archivated` - changes record access rights, thus making it `read-only`. No updates or any other actions then recover are available. At the end of predefined archive record life-time it moves to state `Disabled`
-- `Disabled` - restricts any futher public access to data. Life-time defined by coly data retention policy.
-- `Anonimised` - record is being stripped from personal or any sensitive information. Futher access intendded solely for ML training unit.
-
-#### `public` Assignment model
-
-%description%
-
-%mermaid diagram%
-
-## API<a name="api_link"></a>
-
----
-
-* Base API URL
-
-```http
-https//me-api.coly.io
-```
-
----
-
-&nbsp;
-
-&nbsp;
-
-&nbsp;
-
-* ### Authentication<a name="api_authentication_link"></a>
-
-<hr style="background: #0037A1; height: 7px">
+- `Created` - Creating empty group record.
+- `Updated` - Update client's payload data.
+- `PersonJoined` - Creates new [`Assignment`](#public-assignment-model) record thus linking [`Person`](#public-person-model) and [`Group`](#public-group-model).
+- `PersonLeft` - Set's [`Assignment`](#public-assignment-model) record as inactive.
+- `Archivated` - Changes record access rights, thus making it `read-only`. No updates or any other actions than recovery are available. At the end of the predefined archive record lifetime, it moves to the state `Disabled`.
+- `Disabled` - Restricts any further public access to data. Life-time defined by coly data retention policy.
+- `Anonimised` - Record is being stripped from personal or any sensitive information. Further access is intended solely for the ML training unit.
 
 
-The `api-key` can be found or could be generated via settings page in `ColyMe Console` App.
 
-##### Request Header : 
+
+
+
+
+## API Endpoints<a name="api_link"></a>
+
+<hr style="background: #4C53FF; height: 4px">
+
+Base API URL:
 
 ```http
-Authorization: Application <api-key>
+https://me-api.coly.io
 ```
 
-<hr style="background: #0037A1; height: 7px">
+
+
+&nbsp;&nbsp;&nbsp;
+
+### Authentication<a name="api_authentication_link"></a>
+
+<hr style="background: #4C53FF; height: 3px">
+
+Get started by authenticate our API. Login to your Coly ME account via the `Coly ME Console` application (URL below). The `API-key` is found or could be generated via the settings page in the meny.
+
+```http
+https://console.coly.io
+```
+
+*Do you not have an account? Please contact Coly Sales team*
+
+
+
+##### Request Header
+
+Add your `API-key` like below
+
+```http
+Authorization: Application <API-key>
+```
 
 &nbsp;
 
 &nbsp;
 
-&nbsp;
+### Persons<a name="api_persons_link"></a>
 
-* ### Persons<a name="api_persons_link"></a>
+<hr style="background: #4C53FF; height: 3px">
 
-<hr style="background: #0037A1; height: 7px">
-#### Descripiton: 
-
-The `Persons` entity is mainly refers to your tenets who are living in your property or users who are taking the `Psychometry` Test using our product.each individual person will have their `Personlity` and `Values` traits calculated after taking the test. And the score they get will play a key role when it comes to matching the individual to a certain group.
-
----
+The `Persons` entity mainly refers to the tenants within the shared living space or persons taking the `Psychometry Test` using our product. Each person will have their `Personality` and `Values` traits calculated after taking the test. The score they get will play a key role in matching the individual to a specific group.
 
 
 
 
-* Retrieves single person record, with all the detailed informations that you need.
+
+#### Create person<a name="create_person_link"></a>
+
+<hr style="background: #FE6958; height: 2px">
+
+Creates `Persons` record and returns it. It requires `email` , `firstname`, `lastname` to create a `Persons` record.
+
+```http
+POST /persons
+```
+
+
+
+##### Example request body :
+
+```json
+{
+  "email": "james.bond@mymail.com",
+  "lastname": "Bond",
+  "firstname": "James"
+}
+```
+
+##### Response example : 
+
+```json
+{
+  "id": "993abaa6-693b-456d-b58b-424057c5f0e3",
+  "createdAt": "2022-11-20T17:55:41.266Z",
+  "createdBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
+  "updatedAt": "2022-11-20T17:55:41.266Z",
+  "updatedBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
+  "archivedAt": null,
+  "archivedBy": null,
+  "firstname": "James",
+  "middlename": "",
+  "lastname": "Bond",
+  "email": "james.bond@mymail.com",
+  "gender": null,
+  "language": null,
+  "city": null,
+  "country": null,
+  "birthDate": null,
+  "psychometry": null
+}
+```
+
+
+
+
+
+#### Get person information<a name="get_person_link"></a>
+
+<hr style="background: #FE6958; height: 2px">
+
+Retrieve a single person's record with all the detailed pieces of information that you need.
 
 
 ```http
 GET /persons/:id
 ```
 
-##### Response example : 
+
+
+##### Response example :
 
 ```json
 {
@@ -167,10 +278,10 @@ GET /persons/:id
   "updatedBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
   "archivedAt": null,
   "archivedBy": null,
-  "firstname": "Test",
+  "firstname": "Lucy",
   "middlename": "",
-  "lastname": "erfan",
-  "email": "erfan@coly.io",
+  "lastname": "Carlson",
+  "email": "lucy.carlson@mymail.com",
   "gender": null,
   "language": null,
   "city": null,
@@ -204,18 +315,49 @@ GET /persons/:id
 }
 ```
 
-<hr style="background: #0037A1">
 
 
-* Retrieves basic statistic over owner's created rows, such as:
-  * `Pending` indicates the `Persons` who received the `Psychometry Test` yet haven completed it.
-  * `Ready` indicates the `Persons` who has finished the test and ready to be matched 
-  * `Total` the total number of `Persons` 
-  * `Assigned` indicates tho `Persons` who has finished the test and have been assigned to a group.
+
+
+#### Get person unique test & profile link<a name="get_person_test_link"></a>
+
+<hr style="background: #FE6958; height: 2px">
+
+Retrieves the `Persons` unique URL link for their `Psychometry Test` and/or `Coly ME profile`. This URL link will take you to the `Coly ME Profile` App (https://profile.coly.io/). By default, when the `Persons` opens the link, the `Psychometry Test` will be presented. When `Psychometry Test` is `Ready`(completed), the link will display the `Persons` `Coly ME profile` with the result from the test.
+
+```http
+GET /persons/:id/link
+```
+
+
+
+##### Response example : 
+
+```json
+{
+  "link": "{{Base_url}}/auth/163326933613260363464326d203666626d223734643d243536353d25663661333131313"
+}
+```
+
+
+
+
+
+#### Get stats of person list<a name="get_persons_stats_link"></a>
+
+<hr style="background: #FE6958; height: 2px">
+
+Retrieves the basic stats of the person list, such as :
+* `Pending` indicates the `Persons` who received the `Psychometry Test` yet have completed it.
+* `Ready` means the `Persons` who has finished the test and are ready to be matched.
+* `Total` is the total number of `Persons` in the list.
+* `Assigned` indicates the `Persons` who has finished the test and have been assigned to a `Group`.
 
 ```http
 GET /persons/stats
 ```
+
+
 
 ##### Response example : 
 
@@ -228,15 +370,22 @@ GET /persons/stats
 }
 ```
 
-<hr style="background: #0037A1">
 
 
-* Retrieves list of persons records, with the total number of `Persons` and their detailed informations. 
+
+
+#### Get list of persons<a name="get_persons_list_link"></a>
+
+<hr style="background: #FE6958; height: 2px">
+
+Retrieves the list of person's records, with the total number of `Persons` and their detailed pieces of information.
 
 
 ```http
 GET /persons
 ```
+
+
 
 ##### Response example : 
 
@@ -292,81 +441,29 @@ GET /persons
 }
 ```
 
-<hr style="background: #0037A1">
 
 
-* Retrieves person's test / profile URL link. This URL link will take you to the `ColyMe Profile` App, if the `Psychometry Test` has been completed, the App will display `Personality`, `Values` scores plus a `Your advice` section which displays the `Challanges` the person may face, `Strenghts` of the person and a `Shared living advice` with useful tips for the person that can be refreshed with new tips while clicked the card.
-
-```http
-GET /persons/:id/link
-```
-
-##### Response example : 
-
-```json
-{
-  "link": "{{Base_url}}/auth/163326933613260363464326d203666626d223734643d243536353d25663661333131313"
-}
-```
-
-<hr style="background: #0037A1">
 
 
-* Creates new persons record and returns it, it requires `email` , `firstname`, `lastname` in order to create a `Persons` record.
+#### Update person<a name="update_person_link"></a>
 
-```http
-POST /persons
-```
-
-##### Request body :
-
-```json
-{
-  "email": "person@example.com",
-  "lastname": "Bond",
-  "firstname": "James"
-}
-```
-
-##### Response example : 
-
-```json
-{
-  "id": "993abaa6-693b-456d-b58b-424057c5f0e3",
-  "createdAt": "2022-11-20T17:55:41.266Z",
-  "createdBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
-  "updatedAt": "2022-11-20T17:55:41.266Z",
-  "updatedBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
-  "archivedAt": null,
-  "archivedBy": null,
-  "firstname": "James",
-  "middlename": "",
-  "lastname": "Bond",
-  "email": "person@example.com",
-  "gender": null,
-  "language": null,
-  "city": null,
-  "country": null,
-  "birthDate": null,
-  "psychometry": null
-}
-```
-
-<hr style="background: #0037A1">
+<hr style="background: #FE6958; height: 2px">
 
 
-* Updates person record fields and returns it updated.
-* Also resends invitation if pending psycho test exist.
+* Updates `Persons` record fields and returns updated person record.
+* Resends email invitation if pending `Psychometric Test` exists.
 
 ```http
 PUT /persons/:id
 ```
 
-##### Request body :
+
+
+##### Example request body :
 
 ```json
 {
-  "email": "person@example.com",
+  "email": "james.dean@mymail.com",
   "lastname": "Dean",
   "firstname": "James"
 }
@@ -386,7 +483,7 @@ PUT /persons/:id
   "firstname": "James",
   "middlename": "",
   "lastname": "Dean",
-  "email": "person@example.com",
+  "email": "james.dean@mymail.com",
   "gender": null,
   "language": null,
   "city": null,
@@ -396,23 +493,29 @@ PUT /persons/:id
 }
 ```
 
-<hr style="background: #0037A1">
 
 
-* Creates psychometric test if none and send email request.
+Creates `Psychometric Test` if none and sends email request.
 
 ```http
 GET /persons/:id/invite
 ```
 
-<hr style="background: #0037A1">
 
 
-* Toggles person record archived status
+
+
+#### Archive person<a name="archive_person_link"></a>
+
+<hr style="background: #FE6958; height: 2px">
+
+Archive `Persons` record status.
 
 ```http
 PATCH /persons/:id/archivate
 ```
+
+
 
 ##### Response example : archive person
 
@@ -428,7 +531,7 @@ PATCH /persons/:id/archivate
   "firstname": "James",
   "middlename": "",
   "lastname": "Dean",
-  "email": "person@example.com",
+  "email": "james.dean@mymail.com",
   "gender": null,
   "language": null,
   "city": null,
@@ -438,14 +541,21 @@ PATCH /persons/:id/archivate
 }
 ```
 
-<hr style="background: #0037A1">
 
 
-* Restores a person record from the archive
+
+
+#### Restore person from archive<a name="restore_person_link"></a>
+
+<hr style="background: #FE6958; height: 2px">
+
+Restores a `Persons` record from the archive.
 
 ```http
 PATCH /persons/:id/restore
 ```
+
+
 
 ##### Response example : restore the achived person
 
@@ -461,7 +571,7 @@ PATCH /persons/:id/restore
   "firstname": "James",
   "middlename": "",
   "lastname": "Dean",
-  "email": "person@example.com",
+  "email": "james.dean@mymail.com",
   "gender": null,
   "language": null,
   "city": null,
@@ -471,15 +581,23 @@ PATCH /persons/:id/restore
 }
 ```
 
-<hr style="background: #0037A1">
 
 
-* Disabling person record
-* **Note that only the archived records can be deleted**
+
+
+#### Delete person from archive<a name="delete_person_link"></a>
+
+<hr style="background: #FE6958; height: 2px">
+
+Disabling and deleting `Persons` record from archived.
 
 ```http
 DELETE /persons/:id
 ```
+
+*Note that only the archived records can be deleted.*
+
+
 
 ##### Response example: person record deleted
 
@@ -487,32 +605,163 @@ DELETE /persons/:id
 Status: 204 No content
 ```
 
-<hr style="background: #0037A1; height: 7px">
-
-&nbsp;
-
-&nbsp;
-
-&nbsp;
-
-* ### Groups<a name="api_groups_link"></a>
-
-<hr style="background: #0037A1; height: 7px">
-#### Descripiton: 
-
-
-The `Groups` entity is a collection of `Persons`, usually refers to group of people who lives in a hub. A non-empty group will have a calculated average `Personality` and `Values` scale that can be used to matching a incoming person, and the matching score will indicate the compatibility of the person to the group.
-
----
 
 
 
 
-* Retrieves list of `groups` records, with the total number of groups and the detailed information about each group.
+
+
+### Groups<a name="api_groups_link"></a>
+
+<hr style="background: #4C53FF; height: 3px">
+
+The `Groups` entity is a collection of `Persons`. Usually refers to a group of `Persons` who live in a shared living space. A group is created by `name`, `capacity`and `persons`. A group with persons contains a calculated average score of the `Personality` and `Values` scale that can be used to match an incoming person. 
+
+
+
+
+
+#### Create group<a name="create_group_link"></a>
+
+<hr style="background: #FE6958; height: 2px">
+
+Creates `Group` record and returns it. It requires a Group `name` and a `capacity` of persons for the group.
+
+```http
+POST /groups
+```
+
+
+
+##### Example request body :
+
+```json
+{
+  "name": "Apartment A",
+  "capacity": 4,
+}
+```
+
+##### Response example :
+
+```json
+{
+  "id": "8291747b-f415-4854-95ff-40c43919201c",
+  "createdAt": "2022-11-17T21:13:37.601Z",
+  "createdBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
+  "updatedAt": "2022-11-17T21:13:37.601Z",
+  "updatedBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
+  "archivedAt": null,
+  "archivedBy": null,
+  "name": "Apartment A",
+  "image": null,
+  "capacity": 4,
+  "traits": null
+}
+```
+
+
+
+
+
+#### Get group information<a name="get_group_link"></a>
+
+<hr style="background: #FE6958; height: 2px">
+
+Retrieve a single `Group` record with all the detailed pieces of information that you need, including `Personality` and `Values` percentile.
+
+```http
+GET /groups/:id
+```
+
+
+
+##### Response example:
+
+```json
+{
+  "id": "3747a4ab-a385-4215-9084-5c1479019ba6",
+  "createdAt": "2022-10-31T15:24:51.730Z",
+  "createdBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
+  "updatedAt": "2022-11-01T16:01:03.485Z",
+  "updatedBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
+  "archivedAt": null,
+  "archivedBy": null,
+  "name": "Apartment A",
+  "image": null,
+  "capacity": 4,
+  "traits": {
+    "updatedAt": "2022-11-01T09:57:01.269Z",
+    "traits": {
+      "personality": {
+        "emotionalStability": 0,
+        "conscientiousness": 27.16966379985,
+        "agreeableness": 2.6192337764,
+        "extroversion": 85.3010164191,
+        "openness": 30.6880375293
+        },
+      "values": {
+        "selfDirection": 14.425332290850001,
+        "universalism": 15.324472243899999,
+        "achievement": 75.29319781075,
+        "benevolence": 20.60203283815,
+        "conformity": 36.2392494136,
+        "tradition": 46.1884284597,
+        "security": 45.19155590305,
+        "hedonism": 44.05785770135,
+        "activity": 63.6434714621,
+        "power": 93.6669272869
+      }
+    }
+  }
+}
+```
+
+
+
+
+
+#### Get stats of group list<a name="get_group_stats_link"></a>
+
+<hr style="background: #FE6958; height: 2px">
+
+Retrieves the basic stats of the `Group` list, such as :
+
+* `Available`, the number of groups with empty spots.
+* `Unavailable`, the number of groups that are full with persons.
+* `Total`, the total number of groups.
+
+```http
+GET /groups/status
+```
+
+
+
+##### Response example:
+
+```json
+{
+  "available": 2,
+  "unavailable": 0,
+  "total": 2
+}
+```
+
+
+
+
+
+#### Get list of groups<a name="get_group_list_link"></a>
+
+<hr style="background: #FE6958; height: 2px">
+
+Retrieves a list of `Groups` records, with the total number of groups and detailed information about each group.
 
 ```http
 GET /groups
 ```
+
+
 
 ##### Response example:
 
@@ -528,7 +777,7 @@ GET /groups
       "updatedBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
       "archivedAt": null,
       "archivedBy": null,
-      "name": "Group A",
+      "name": "Apartment A",
       "image": null,
       "capacity": 4,
       "traits": {
@@ -561,128 +810,27 @@ GET /groups
 }
 ```
 
-<hr style="background: #0037A1">
 
 
-* Retrieves basic statistic over owner's created rows, such as :
-  * `Avalable` the number of groups with empty spots
-  * `Unavailable` the number of groups that are full
-  * `Total` the total number of groups
-
-```http
-GET /groups/status
-```
-
-##### Response example:
-
-```json
-{
-  "available": 2,
-  "unavailable": 0,
-  "total": 2
-}
-```
-
-<hr style="background: #0037A1">
 
 
-* Retrieves single group record
+#### Update group<a name="update_group_link"></a>
 
-```http
-GET /groups/:id
-```
+<hr style="background: #FE6958; height: 2px">
 
-##### Response example:
-
-```json
-{
-  "id": "3747a4ab-a385-4215-9084-5c1479019ba6",
-  "createdAt": "2022-10-31T15:24:51.730Z",
-  "createdBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
-  "updatedAt": "2022-11-01T16:01:03.485Z",
-  "updatedBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
-  "archivedAt": null,
-  "archivedBy": null,
-  "name": "Group A",
-  "image": null,
-  "capacity": 4,
-  "traits": {
-    "updatedAt": "2022-11-01T09:57:01.269Z",
-    "traits": {
-      "personality": {
-        "emotionalStability": 0,
-        "conscientiousness": 27.16966379985,
-        "agreeableness": 2.6192337764,
-        "extroversion": 85.3010164191,
-        "openness": 30.6880375293
-        },
-      "values": {
-        "selfDirection": 14.425332290850001,
-        "universalism": 15.324472243899999,
-        "achievement": 75.29319781075,
-        "benevolence": 20.60203283815,
-        "conformity": 36.2392494136,
-        "tradition": 46.1884284597,
-        "security": 45.19155590305,
-        "hedonism": 44.05785770135,
-        "activity": 63.6434714621,
-        "power": 93.6669272869
-      }
-    }
-  }
-}
-```
-
-<hr style="background: #0037A1">
-
-
-* Creates new group record and returns it. The end-point requires a groups name and the preferred capacity for the group.
-
-```http
-POST /groups
-```
-
-##### Request body :
-
-```json
-{
-  "name": "Group A",
-  "capacity": 4,
-}
-```
-
-##### Response example :
-
-```json
-{
-  "id": "8291747b-f415-4854-95ff-40c43919201c",
-  "createdAt": "2022-11-17T21:13:37.601Z",
-  "createdBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
-  "updatedAt": "2022-11-17T21:13:37.601Z",
-  "updatedBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
-  "archivedAt": null,
-  "archivedBy": null,
-  "name": "Group A",
-  "image": null,
-  "capacity": 4,
-  "traits": null
-}
-```
-
-<hr style="background: #0037A1">
-
-
-* Updates group record fields and returns it updated, you can alter the name and the capacity of the group record that you created.
+Updates `Group` record fields and returns it updated. You can alter the `name` and the `capacity` of the group record you created.
 
 ```http
 PUT /groups/:id
 ```
 
-##### Request body :
+
+
+##### Example request body :
 
 ```json
 {
-  "name": "Group A",
+  "name": "Apartment A1",
   "capacity": 2,
 }
 ```
@@ -698,23 +846,30 @@ PUT /groups/:id
   "updatedBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
   "archivedAt": null,
   "archivedBy": null,
-  "name": "Group A",
+  "name": "Apartment A1",
   "image": null,
   "capacity": 2,
   "traits": null
 }
 ```
 
-<hr style="background: #0037A1">
 
 
-* Toggles group record archived status.
+
+
+#### Archive group<a name="archive_group_link"></a>
+
+<hr style="background: #FE6958; height: 2px">
+
+Archive `Group` record status.
 
 ```http
 PATCH /groups/:id/archivate
 ```
 
-##### Response example : archive group
+
+
+##### Response example : Archive group
 
 ```json
 {
@@ -725,21 +880,28 @@ PATCH /groups/:id/archivate
   "updatedBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
   "archivedAt": "2022-11-17T22:42:26.613Z",
   "archivedBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
-  "name": "Group TMZ",
+  "name": "Apartment A1",
   "image": null,
   "capacity": 2,
   "traits": null
 }
 ```
 
-<hr style="background: #0037A1">
 
 
-* Restores a group record from the archive
+
+
+#### Restore group from archive<a name="restore_group_link"></a>
+
+<hr style="background: #FE6958; height: 2px">
+
+Restores a `Group` record from the archive.
 
 ```http
 PATCH /groups/:id/restore
 ```
+
+
 
 ##### Response example : restore the archived group
 
@@ -752,55 +914,65 @@ PATCH /groups/:id/restore
   "updatedBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
   "archivedAt": null,
   "archivedBy": null,
-  "name": "Group TMZ",
+  "name": "Apartment A1",
   "image": null,
   "capacity": 2,
   "traits": null
 }
 ```
 
-<hr style="background: #0037A1">
 
 
-* Disabling group record
-  **Note that only the archived records can be deleted**
 
+
+#### Delete group from archive<a name="delete_group_link"></a>
+
+<hr style="background: #FE6958; height: 2px">
+
+Disabling and deleting `Group` record from archived.
 ```http
 DELETE /groups/:id
 ```
+
+*Note that only the archived records can be deleted.*
+
+
 
 ##### Response example: group record deleted
 
 ```http
 Status: 204 No content
 ```
-<hr style="background: #0037A1; height: 7px">
-
-&nbsp;
-
-&nbsp;
-
-&nbsp;
-
-* ### Assignments<a name="api_assignments_link"></a>
-
-<hr style="background: #0037A1; height: 7px">
-
-### Description:
-
-Assignments end-point is used for manging `assignments`, indicating the relation between `Persons` and `Groups` records. 
-
----
 
 
 
-* Assigning `persons` records to `groups` . You would need both `groupId` and `personId` in order to create assignment records.
+
+
+
+
+### Assignments<a name="api_assignments_link"></a>
+
+<hr style="background: #4C53FF; height: 3px">
+
+`Assignments` are used for adding and removing `Persons` to and from a `Group`. Assignments are indicating the relation between `Persons` and `Groups` records. 
+
+
+
+
+
+#### Assign person to group<a name="assign_person_group_link"></a>
+
+<hr style="background: #FE6958; height: 2px">
+
+Assign a `Person`  to a `Group`. You would need both `groupId` and `personId` to create assignment records.
 
 ```http
 POST /assignments
 ```
 
-##### Request body :
+
+
+##### Example request body :
 
 ```json
 {
@@ -809,7 +981,7 @@ POST /assignments
 }
 ```
 
-##### Response example:
+##### Response example: 
 
 ```json
 {
@@ -823,16 +995,23 @@ POST /assignments
 }
 ```
 
-<hr style="background: #0037A1">
 
 
-* Closes assignment for specified person, here you are basically deleting or removing the assignment records. 
+
+
+#### Remove person from group<a name="remove_person_group_link"></a>
+
+<hr style="background: #FE6958; height: 2px">
+
+Remove a `Person` from a `Group`. This closes the assignment for specified person by deleting or removing the assignment record. 
 
 ```http
 DELETE /assignments
 ```
 
-##### Request body :
+
+
+##### Example request body :
 
 ```json
 {
@@ -853,37 +1032,34 @@ DELETE /assignments
   "personId": "11131f6e-5654-4d72-bff0-b4d60b1c9b3a"
 }
 ```
-<hr style="background: #0037A1; height: 7px">
-
-&nbsp;
-
-&nbsp;
-
-&nbsp;
-
-* ### Match<a name="api_match_link"></a>
-
-<hr style="background: #0037A1; height: 7px">
-
-#### Description:
-
-The Match end-point is used to operate "one to many" matching between `Persons` and `Groups` entities and getting the final matching score which indicates the compatibility between the two entity.  
-
----
 
 
 
-* Operates matching between persons and groups
-  * `One` indicates the single entity matching to other
-  * `Many` indicates the array of entity being matched 
-  * `Type` indicates the type of entity getting matched, `0` as the person, `1` as the group
-  * `Id` as the id of the entity 
+
+
+
+
+### Match<a name="api_match_link"></a>
+
+<hr style="background: #4C53FF; height: 3px">
+
+The `Match` matches one `Person` to  "1..M" `Groups` entities. You can also match one `Group` to "1..M" `Persons` entities. The response results in a matching score indicating the two entity's compatibility. 
+
+
+
+Operates matching between persons and groups :
+* `One` indicate the single entity matching the other.
+* `Many` indicate the array of entities being matched.
+* `Type` indicates the type of entity getting matched, `0` as the `Person` and `1` as the `Group`.
+* `Id` as the id of the entity.
 
 ```http
 POST /match
 ```
 
-##### Request body:
+
+
+##### Example request body:
 
 ```json
 {
@@ -900,14 +1076,12 @@ POST /match
 }
 ```
 
-##### Response example : Returns the matching score
+
+
+##### Response example: Returns matching score
 
 ```json
 {
-    63.5
+  63,5
 }
 ```
-
- 
-
-<hr style="background: #0037A1; height: 7px">
