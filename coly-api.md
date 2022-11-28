@@ -70,11 +70,6 @@ Go to [API](#api_link) section to get started!
 
 Our data models have several types(or layers) that define our approach. Simply speaking, the data lifecycle reveals steps and actions that should be taken to reach them. 
 
-Any model could be either public or private:
-
-- Public means it's accessible from outside(any API consumers like: frontend applications, client services, widgets, etc.).
-- Private means that such a model would be unreachable from outside and used solely by system internals. Usually used to extend [primary models](#primary-models) with computed data. // Why do we share this? 
-
 ```mermaid
 graph LR;
   Group & Person --> Assignment --> Feedback
