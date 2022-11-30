@@ -45,7 +45,7 @@
 
 <hr style="background: #4C53FF; height: 4px">
 
-The Coly ME API Documentation provides descriptive information for developers who would like to integrate the functionality of Coly ME into their solution.
+The Coly ME API Documentation provides descriptive information for developers who would like to integrate the functionality of the Coly ME API into their solution.
 
 The Coly ME engine is provided in four simple steps. 
 
@@ -54,7 +54,7 @@ The Coly ME engine is provided in four simple steps.
 3. Create a group and assign persons to it.
 4. Match.
 
-The order of the API endpoints is placed after the user flow above.
+The API endpoints are documented in the same order as the user flow above.
 
 Go to [API](#api_link) section to get started!
 
@@ -69,11 +69,6 @@ Go to [API](#api_link) section to get started!
 <hr style="background: #4C53FF; height: 4px">
 
 Our data models have several types(or layers) that define our approach. Simply speaking, the data lifecycle reveals steps and actions that should be taken to reach them. 
-
-Any model could be either public or private:
-
-- Public means it's accessible from outside(any API consumers like: frontend applications, client services, widgets, etc.).
-- Private means that such a model would be unreachable from outside and used solely by system internals. Usually used to extend [primary models](#primary-models) with computed data.
 
 ```mermaid
 graph LR;
@@ -172,7 +167,7 @@ https://me-api.coly.io
 
 <hr style="background: #4C53FF; height: 3px">
 
-Get started by authenticate our API. Login to your Coly ME account via the `Coly ME Console` application (URL below). The `API-key` is found or could be generated via the settings page in the meny.
+Get started by authenticating to our API. Login to your Coly ME account via the `Coly ME Console` application (URL below). The `API-key` is found, or could be generated, from the settings page, integration section, of the console:
 
 ```http
 https://console.coly.io
@@ -198,7 +193,7 @@ Authorization: Application <API-key>
 
 <hr style="background: #4C53FF; height: 3px">
 
-The `Persons` entity mainly refers to the tenants within the shared living space or persons taking the `Psychometry Test` using our product. Each person will have their `Personality` and `Values` traits calculated after taking the test. The score they get will play a key role in matching the individual to a specific group.
+The `Persons` entity mainly refers to the tenants within a shared living space, or persons taking the `Psychometry Test` using our product. Each person will have their `Personality` and `Values` traits calculated after taking the test. The score they get will play a key role in matching the individual to a specific group.
 
 
 
@@ -347,7 +342,7 @@ GET /persons/:id/link
 
 <hr style="background: #FE6958; height: 2px">
 
-Retrieves the basic stats of the person list, such as :
+Retrieves the basic stats of the person list, such as:
 * `Pending` indicates the `Persons` who received the `Psychometry Test` yet have completed it.
 * `Ready` means the `Persons` who has finished the test and are ready to be matched.
 * `Total` is the total number of `Persons` in the list.
@@ -615,7 +610,7 @@ Status: 204 No content
 
 <hr style="background: #4C53FF; height: 3px">
 
-The `Groups` entity is a collection of `Persons`. Usually refers to a group of `Persons` who live in a shared living space. A group is created by `name`, `capacity`and `persons`. A group with persons contains a calculated average score of the `Personality` and `Values` scale that can be used to match an incoming person. 
+The `Groups` entity is a collection of `Persons`. Usually refers to a group of `Persons` who live in a shared living space. A group is created by `name`, `capacity`, and `persons`. A group with persons contains a calculated average score of the `Personality` and `Values`, scale that can be used to match an incoming person. 
 
 
 
@@ -732,7 +727,7 @@ Retrieves the basic stats of the `Group` list, such as :
 * `Total`, the total number of groups.
 
 ```http
-GET /groups/status
+GET /groups/stats
 ```
 
 
@@ -861,7 +856,7 @@ PUT /groups/:id
 
 <hr style="background: #FE6958; height: 2px">
 
-Archive `Group` record status.
+Archive `Group` record status. // A bit too late for this now, but I don't think "archivate" is a word 
 
 ```http
 PATCH /groups/:id/archivate
@@ -1042,14 +1037,12 @@ DELETE /assignments
 ### Match<a name="api_match_link"></a>
 
 <hr style="background: #4C53FF; height: 3px">
+The `Match` matches a matching source, `one`, to several different matching targets, `many`. `one` can be a single person, single group, or a an array of persons (what we usually refer to as "virtual group"). `many` can be an array with combinations of groups, persons, or also a virtual groups.
 
-The `Match` matches one `Person` to  "1..M" `Groups` entities. You can also match one `Group` to "1..M" `Persons` entities. The response results in a matching score indicating the two entity's compatibility. 
+The response is an array indicating the compability of the matches. The scores are indexed in the same order as the many array in the request. 
 
-
-
-Operates matching between persons and groups :
-* `One` indicate the single entity matching the other.
-* `Many` indicate the array of entities being matched.
+* `One` indicates singel matching source.
+* `Many` indicate the array of matching targets.
 * `Type` indicates the type of entity getting matched, `0` as the `Person` and `1` as the `Group`.
 * `Id` as the id of the entity.
 
@@ -1065,12 +1058,16 @@ POST /match
 {
   "one": {
     "type": 0,
-    "id": "11131f6e-5654-4d72-bff0-b4d60b1c9b3a"
+    "id": "a601daf0-fe21-4b02-9659-21c426e9b7a4"
   },
   "many": [
     {
       "type": 1,
       "id": "3747a4ab-a385-4215-9084-5c1479019ba6"
+    },
+    {
+      "type": 1,
+      "id": "5295a4ab-b456-9385-1056-4a1857492cd7"
     }
   ]
 }
@@ -1081,7 +1078,108 @@ POST /match
 ##### Response example: Returns matching score
 
 ```json
+[
+    {
+        "score": 67.415308235859726
+    },
+    {
+        "score": 78.49231287996193
+    }
+]
+```
+
+
+
+##### Example 2 request body(one is an array of persons, i.e, "virtual group") :
+
+```json
 {
-  63,5
+  "one": [{
+    "type": 0,
+    "id": "a601daf0-fe21-4b02-9659-21c426e9b7a4"
+  },{
+    "type": 0,
+    "id": "1d27c0ab-9c7b-4738-a2fd-0ca013c4de10"
+  }],
+  "many": [
+    {
+      "type": 1,
+      "id": "3747a4ab-a385-4215-9084-5c1479019ba6"
+    },
+    {
+      "type": 1,
+      "id": "5295a4ab-b456-9385-1056-4a1857492cd7"
+    }
+  ]
 }
 ```
+
+
+
+##### Response 2 example: Returns matching score
+
+```json
+[
+    {
+        "score": 59.57382039583729
+    },
+    {
+        "score": 71.64483092758392
+    }
+]
+```
+
+
+
+##### Example 3 request body(many now also includes a virtual group):
+
+```json
+{
+  "one": [{
+    "type": 0,
+    "id": "a601daf0-fe21-4b02-9659-21c426e9b7a4"
+  },{
+    "type": 0,
+    "id": "1d27c0ab-9c7b-4738-a2fd-0ca013c4de10"
+  }],
+  "many": [
+    {
+      "type": 1,
+      "id": "3747a4ab-a385-4215-9084-5c1479019ba6"
+    },
+    {
+      "type": 1,
+      "id": "5295a4ab-b456-9385-1056-4a1857492cd7"
+    },
+    [
+      {
+      	"type": 0,
+      	"id": "4df377f2-d6b0-4540-95f7-3fbc949d0015"
+    	},
+    	{
+      	"type": 0,
+      	"id": "6213111e-741b-43b1-a178-13ab09f62c30"
+    	},
+    ]
+  ]
+}
+```
+
+
+
+##### Response 3 example: Returns matching score
+
+```json
+[
+    {
+        "score": 59.57382039583729
+    },
+    {
+        "score": 71.64483092758392
+    },
+    {
+        "score": 83.83191093758392
+    },  
+]
+```
+
