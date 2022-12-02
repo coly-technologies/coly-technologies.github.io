@@ -196,6 +196,11 @@ Authorization: Application <API-key>
 #### Exceptions & Error Handling <a name="exceptions_auth_link"></a>
 
 <hr style="background: #FE6958; height: 2px">
+ Our API provides customized HTTP response codes. In general there are two components:
+
+* `code` contains two main information, the first half indicates the corresponding entity, and the second half indicates the cause of the error.
+* `message` contains a brief description of the error.
+
 
 ##### Invalid Access Token :
 
@@ -881,17 +886,6 @@ In-case of person records which are assigned to a certain group, are not allowed
 
 ---
 
-##### Disabled Status Required :
-
-```json
-{
-    "code": "Person::DisabledStatusRequired",
-    "message": "Specified person record should be disabled first"
-}
-```
-
----
-
 ##### Unknown:
 
 If there would be an case of an unknown Error, there is a high chance of server side error. contact us through email dev@coly.io with detailed information about the error.
@@ -1385,6 +1379,8 @@ When there are not more vacancies left for the group to add new person records.
 
 ##### Not Empty :
 
+In-case there's an operation such as `archive` on a non empty group record.
+
 ```json
 {
     "code": "Group::NotEmpty",
@@ -1545,6 +1541,8 @@ When the desired record is missing.
 
 ##### Discard Required :
 
+In-case of assigning a person record which is already belongs to another group.
+
 ```json
 {
     "code": "Assignment::DiscardRequired",
@@ -1555,6 +1553,8 @@ When the desired record is missing.
 ---
 
 ##### Closed Assignment :
+
+In-case of attempting to change or access a closed assignment record.
 
  ```json
  {
