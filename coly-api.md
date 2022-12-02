@@ -700,6 +700,13 @@ PATCH /persons/:id/archivate
 ##### SSE payload example : 
 
 ```typescript
+action: "archived"
+issuedAt: "2022-12-01T19:55:27.276Z"
+issuedBy: "72d6943c-2b64-43bf-8c38-93c83dc4edab"
+message: "Person record has been sent to the archive"
+meta: {personId: "af1c8404-a074-4be5-8532-120907a843f4"}
+topic: "Person"
+workspaceId: "72d6943c-2b64-43bf-8c38-93c83dc4edab"
 ```
 
 
@@ -746,6 +753,13 @@ PATCH /persons/:id/restore
 ##### SSE payload example : 
 
 ```typescript
+action: "restored"
+issuedAt: "2022-12-01T19:55:27.276Z"
+issuedBy: "72d6943c-2b64-43bf-8c38-93c83dc4edab"
+message: "Person record has been removed from the archive"
+meta: {personId: "af1c8404-a074-4be5-8532-120907a843f4"}
+topic: "Person"
+workspaceId: "72d6943c-2b64-43bf-8c38-93c83dc4edab"
 ```
 
 
@@ -778,6 +792,13 @@ Status: 204 No content
 ##### SSE payload example : 
 
 ```typescript
+action: "disabled"
+issuedAt: "2022-12-01T19:55:27.276Z"
+issuedBy: "72d6943c-2b64-43bf-8c38-93c83dc4edab"
+message: "Person record has been disabled irrevensibly"
+meta: {personId: "af1c8404-a074-4be5-8532-120907a843f4"}
+topic: "Person"
+workspaceId: "72d6943c-2b64-43bf-8c38-93c83dc4edab"
 ```
 
 
@@ -1199,6 +1220,13 @@ PATCH /groups/:id/archivate
 ##### SSE payload example : 
 
 ```typescript
+action: "archived"
+issuedAt: "2022-12-01T20:30:04.008Z"
+issuedBy: "72d6943c-2b64-43bf-8c38-93c83dc4edab"
+message: "Group record has been sent to the archive"
+meta: {groupId: '6522739f-c10f-47d9-a0a6-70165041cf06'}
+topic: "Group"
+workspaceId: "72d6943c-2b64-43bf-8c38-93c83dc4edab"
 ```
 
 
@@ -1241,6 +1269,13 @@ PATCH /groups/:id/restore
 ##### SSE payload example : 
 
 ```typescript
+action: "restored"
+issuedAt: "2022-12-01T20:30:04.008Z"
+issuedBy: "72d6943c-2b64-43bf-8c38-93c83dc4edab"
+message: "Group record has been removed from the archive"
+meta: {groupId: '6522739f-c10f-47d9-a0a6-70165041cf06'}
+topic: "Group"
+workspaceId: "72d6943c-2b64-43bf-8c38-93c83dc4edab"
 ```
 
 
@@ -1272,6 +1307,13 @@ Status: 204 No content
 ##### SSE payload example : 
 
 ```typescript
+action: "disabled"
+issuedAt: "2022-12-01T20:30:04.008Z"
+issuedBy: "72d6943c-2b64-43bf-8c38-93c83dc4edab"
+message: "Group record has been disabled irrevensibly"
+meta: {groupId: '6522739f-c10f-47d9-a0a6-70165041cf06'}
+topic: "Group"
+workspaceId: "72d6943c-2b64-43bf-8c38-93c83dc4edab"
 ```
 
 
