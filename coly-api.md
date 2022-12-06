@@ -11,6 +11,7 @@
 * [Data Lifecycle Description](#description_link)
 * [API Endpoints](#api_link)
   * [Authentication](#api_authentication_link)
+    * [Exceptions](#exceptions_auth_link)
   * [Persons](#api_persons_link)
     * [Create person](#create_person_link)
     * [Get person information](#get_person_link)
@@ -18,9 +19,11 @@
     * [Get stats of person list](#get_persons_stats_link)
     * [Get list of persons](#get_persons_list_link)
     * [Update person](#update_person_link)
+    * [Person test invitation](#Person_invite_link)
     * [Archive person](#archive_person_link)
     * [Restore person from archive](#restore_person_link)
     * [Delete person from archive](#delete_person_link)
+    * [Exceptions](#exceptions_person_link)
   * [Groups](#api_groups_link)
     * [Create group](#create_group_link)
     * [Get group information](#get_group_link)
@@ -30,10 +33,13 @@
     * [Archive group](#archive_group_link)
     * [Restore group from archive](#restore_group_link)
     * [Delete group from archive](#delete_group_link)
+    * [Exceptions](#exceptions_group_link)
   * [Assignments](#api_assignments_link)
     * [Assign person to group](#assign_person_group_link)
     * [Remove person from group](#remove_person_group_link)
+    * [Exceptions](#exceptions_assignments_link)
   * [Match](#api_match_link)
+  * [Events (SSE)](#api_events_link)
 
 
 
@@ -93,7 +99,8 @@ Core-level models contain crucial data for system operations.
 
 #### `public` Person model
 
-<hr style="background: #FE6958; height: 2px">
+<hr style="background: #00c434; height: 2px">
+
 
 ```mermaid
 graph LR;
@@ -120,7 +127,8 @@ graph LR;
 
 #### `public` Group model
 
-<hr style="background: #FE6958; height: 2px">
+<hr style="background: #00c434; height: 2px">
+
 
 ```mermaid
 graph LR;
@@ -159,9 +167,7 @@ Base API URL:
 https://me-api.coly.io
 ```
 
-
-
-&nbsp;&nbsp;&nbsp;
+&nbsp;
 
 ### Authentication<a name="api_authentication_link"></a>
 
@@ -185,6 +191,108 @@ Add your `API-key` like below
 Authorization: Application <API-key>
 ```
 
+
+
+#### Exceptions & Error Handling <a name="exceptions_auth_link"></a>
+
+<hr style="background: #FE6958; height: 2px">
+ Our API provides customized HTTP response codes. In general there are two components:
+
+* `code` contains two main information, the first half indicates the corresponding entity, and the second half indicates the cause of the error.
+* `message` contains a brief description of the error.
+
+
+##### Invalid Access Token :
+
+In-case of provided access token is invalid.
+
+```json
+{
+    "code": "Auth::InvalidAccessToken",
+    "message": "Access token is invalid"
+}
+```
+
+---
+
+##### Expired Access Token :
+
+In-case of provided access token has expired.
+
+```json
+{
+    "code": "Auth::ExpiredAccessToken",
+    "message": "Access token is expired"
+}
+```
+
+---
+
+##### Header Requirement: 
+
+The Bearer access token must be included into the request header.
+
+```json
+{
+    "code": "Auth::HeaderRequired",
+    "message": "You need to have bearer token included into request"
+}
+```
+
+---
+
+##### Invalid Refresh Token :
+
+In-case of an invalid refresh token has been passed.
+
+```json
+{
+    "code": "Auth::InvalidRefreshToken",
+    "message": "Refresh token is invalid"
+}
+```
+
+---
+
+##### Expired Refresh Token :
+
+In-case of an expired refresh token has been passed.
+
+```json
+{
+    "code": "Auth::ExpiredRefreshToken",
+    "message": "Refresh token is expired"
+}
+```
+
+---
+
+##### Invalid Credentials :
+
+In-case of invalid password or email address has been passed.
+
+```json
+{
+    "code": "InvalidCredentials",
+    "message": "Email or password is invalid"
+}
+```
+
+---
+
+##### Email Verification Required : 
+
+In-case of the user email address has not been verified.
+
+```json
+{
+    "code": "Auth::EmailVerificationRequired",
+    "message": "Account is not yet verified."
+}
+```
+
+
+
 &nbsp;
 
 &nbsp;
@@ -193,15 +301,16 @@ Authorization: Application <API-key>
 
 <hr style="background: #4C53FF; height: 3px">
 
-The `Persons` entity mainly refers to the tenants within a shared living space, or persons taking the `Psychometry Test` using our product. Each person will have their `Personality` and `Values` traits calculated after taking the test. The score they get will play a key role in matching the individual to a specific group.
+The `Persons` entity mainly refers to the tenants within a shared living space, or persons taking the `Psychometry Test` using our product. Each person will have their `Personality` and `Values` traits calculated after taking the test. The score they get will play a key role in matching the individual to a specific group. 
 
 
-
+&nbsp;
 
 
 #### Create person<a name="create_person_link"></a>
 
-<hr style="background: #FE6958; height: 2px">
+<hr style="background: #00c434; height: 2px">
+
 
 Creates `Persons` record and returns it. It requires `email` , `firstname`, `lastname` to create a `Persons` record.
 
@@ -247,11 +356,26 @@ POST /persons
 
 
 
+##### SSE payload example : 
+
+```typescript
+action: "created"
+issuedAt: "2022-12-01T19:55:26.876Z"
+issuedBy: "72d6943c-2b64-43bf-8c38-93c83dc4edab"
+message: "New person record has been created"
+meta: {personId: 'af1c8404-a074-4be5-8532-120907a843f4'}
+topic: "Person"
+workspaceId: "72d6943c-2b64-43bf-8c38-93c83dc4edab"
+```
+
+
+
 
 
 #### Get person information<a name="get_person_link"></a>
 
-<hr style="background: #FE6958; height: 2px">
+<hr style="background: #00c434; height: 2px">
+
 
 Retrieve a single person's record with all the detailed pieces of information that you need.
 
@@ -316,7 +440,8 @@ GET /persons/:id
 
 #### Get person unique test & profile link<a name="get_person_test_link"></a>
 
-<hr style="background: #FE6958; height: 2px">
+<hr style="background: #00c434; height: 2px">
+
 
 Retrieves the `Persons` unique URL link for their `Psychometry Test` and/or `Coly ME profile`. This URL link will take you to the `Coly ME Profile` App (https://profile.coly.io/). By default, when the `Persons` opens the link, the `Psychometry Test` will be presented. When `Psychometry Test` is `Ready`(completed), the link will display the `Persons` `Coly ME profile` with the result from the test.
 
@@ -340,7 +465,8 @@ GET /persons/:id/link
 
 #### Get stats of person list<a name="get_persons_stats_link"></a>
 
-<hr style="background: #FE6958; height: 2px">
+<hr style="background: #00c434; height: 2px">
+
 
 Retrieves the basic stats of the person list, such as:
 * `Pending` indicates the `Persons` who received the `Psychometry Test` yet have completed it.
@@ -371,7 +497,8 @@ GET /persons/stats
 
 #### Get list of persons<a name="get_persons_list_link"></a>
 
-<hr style="background: #FE6958; height: 2px">
+<hr style="background: #00c434; height: 2px">
+
 
 Retrieves the list of person's records, with the total number of `Persons` and their detailed pieces of information.
 
@@ -442,7 +569,8 @@ GET /persons
 
 #### Update person<a name="update_person_link"></a>
 
-<hr style="background: #FE6958; height: 2px">
+<hr style="background: #00c434; height: 2px">
+
 
 
 * Updates `Persons` record fields and returns updated person record.
@@ -490,6 +618,27 @@ PUT /persons/:id
 
 
 
+##### SSE payload example :  
+
+```typescript
+action: "updated"
+issuedAt: "2022-12-01T20:00:35.573Z"
+issuedBy: "72d6943c-2b64-43bf-8c38-93c83dc4edab"
+message: "Person record has been updated"
+meta: {personId: 'af1c8404-a074-4be5-8532-120907a843f4'}
+topic: "Person"
+workspaceId: "72d6943c-2b64-43bf-8c38-93c83dc4edab"
+```
+
+
+
+
+
+#### Psychometric Test invite <a name="Person_invite_link"> </a>
+
+<hr style="background: #00c434; height: 2px">
+
+
 Creates `Psychometric Test` if none and sends email request.
 
 ```http
@@ -498,11 +647,26 @@ GET /persons/:id/invite
 
 
 
+##### SSE payload example: 
+
+```typescript
+action: "invited"
+issuedAt: "2022-12-01T19:55:27.276Z"
+issuedBy: "72d6943c-2b64-43bf-8c38-93c83dc4edab"
+message: "Person record has been set as active"
+meta: {isRetry: false}
+topic: "Person"
+workspaceId: "72d6943c-2b64-43bf-8c38-93c83dc4edab"
+```
+
+
+
 
 
 #### Archive person<a name="archive_person_link"></a>
 
-<hr style="background: #FE6958; height: 2px">
+<hr style="background: #00c434; height: 2px">
+
 
 Archive `Persons` record status.
 
@@ -538,11 +702,24 @@ PATCH /persons/:id/archivate
 
 
 
+##### SSE payload example : 
+
+```typescript
+action: "archived"
+issuedAt: "2022-12-01T19:55:27.276Z"
+issuedBy: "72d6943c-2b64-43bf-8c38-93c83dc4edab"
+message: "Person record has been sent to the archive"
+meta: {personId: "af1c8404-a074-4be5-8532-120907a843f4"}
+topic: "Person"
+workspaceId: "72d6943c-2b64-43bf-8c38-93c83dc4edab"
+```
+
 
 
 #### Restore person from archive<a name="restore_person_link"></a>
 
-<hr style="background: #FE6958; height: 2px">
+<hr style="background: #00c434; height: 2px">
+
 
 Restores a `Persons` record from the archive.
 
@@ -578,11 +755,26 @@ PATCH /persons/:id/restore
 
 
 
+##### SSE payload example : 
+
+```typescript
+action: "restored"
+issuedAt: "2022-12-01T19:55:27.276Z"
+issuedBy: "72d6943c-2b64-43bf-8c38-93c83dc4edab"
+message: "Person record has been removed from the archive"
+meta: {personId: "af1c8404-a074-4be5-8532-120907a843f4"}
+topic: "Person"
+workspaceId: "72d6943c-2b64-43bf-8c38-93c83dc4edab"
+```
+
+
+
 
 
 #### Delete person from archive<a name="delete_person_link"></a>
 
-<hr style="background: #FE6958; height: 2px">
+<hr style="background: #00c434; height: 2px">
+
 
 Disabling and deleting `Persons` record from archived.
 
@@ -602,9 +794,110 @@ Status: 204 No content
 
 
 
+##### SSE payload example : 
+
+```typescript
+action: "disabled"
+issuedAt: "2022-12-01T19:55:27.276Z"
+issuedBy: "72d6943c-2b64-43bf-8c38-93c83dc4edab"
+message: "Person record has been disabled irrevensibly"
+meta: {personId: "af1c8404-a074-4be5-8532-120907a843f4"}
+topic: "Person"
+workspaceId: "72d6943c-2b64-43bf-8c38-93c83dc4edab"
+```
 
 
 
+#### Exceptions & Error Handling <a name="exceptions_person_link"></a>
+
+<hr style="background: #FE6958; height: 2px">
+
+##### Record Not Found :
+
+When the desired record is missing or the wrong credentials were provided. 
+
+```json
+{
+    "code": "Person::NotFound",
+    "message": "Specified person record wasn't found.",
+}
+```
+
+---
+
+##### Email Already In Use:
+
+When creating an person record, the email of the user should be unique and not be reused, unless the person have been completely removed from the platform.
+
+```json
+{
+    "code": "Person::Emailused",
+    "message": "Given email is already in use. Should be unique."
+}
+```
+
+---
+
+##### Persons Traits Missing:
+
+In-case of the specific person hasn't complete the psychometry test.
+
+```json
+{
+    "code": "Person::Notraits",
+    "message": "Specified person record should have at least one submitted psychometric test"
+}
+```
+
+---
+
+##### Archived Record Restriction:
+
+In-case of archived records, They are not allowed to be matched, assigned to groups. In order to achieve this, you would need to restore the record first or disable/delete it. 
+
+```json
+{
+    "code": "Person::ArchiveStatusRestriction",
+    "message": "Specified person record is in archive. Could be disabled or restored."
+}
+```
+
+In-case of non-archived records, you would have to archive the record first, in order to disable/delete it.
+
+```json
+{
+    "code": "Person::ArchiveStatusRequired",
+    message: "Specified person record should be moved in archive first."
+}
+```
+
+---
+
+##### Assigned Record Restriction:
+
+In-case of person records which are assigned to a certain group, are not allowed to assigned to more than one group at the same time.
+
+```json
+{
+    "code": "Person::GroupRestriction",
+    "message": "Specified person record shouldn't be assigned to a group."
+}
+```
+
+---
+
+##### Unknown:
+
+If there would be an case of an unknown Error, there is a high chance of server side error. contact us through email dev@coly.io with detailed information about the error.
+
+```json
+{
+    "code": "Person::Unknown",
+    "message": "Internal service error."
+}
+```
+
+ 
 
 ### Groups<a name="api_groups_link"></a>
 
@@ -618,7 +911,8 @@ The `Groups` entity is a collection of `Persons`. Usually refers to a group of `
 
 #### Create group<a name="create_group_link"></a>
 
-<hr style="background: #FE6958; height: 2px">
+<hr style="background: #00c434; height: 2px">
+
 
 Creates `Group` record and returns it. It requires a Group `name` and a `capacity` of persons for the group.
 
@@ -657,11 +951,26 @@ POST /groups
 
 
 
+##### SSE payload example : 
+
+```typescript
+action: "created"
+issuedAt: "2022-12-01T20:26:57.929Z"
+issuedBy: "72d6943c-2b64-43bf-8c38-93c83dc4edab"
+message: "New group record has been created"
+meta: {groupId: '6522739f-c10f-47d9-a0a6-70165041cf06'}
+topic: "Group"
+workspaceId: "72d6943c-2b64-43bf-8c38-93c83dc4edab"
+```
+
+
+
 
 
 #### Get group information<a name="get_group_link"></a>
 
-<hr style="background: #FE6958; height: 2px">
+<hr style="background: #00c434; height: 2px">
+
 
 Retrieve a single `Group` record with all the detailed pieces of information that you need, including `Personality` and `Values` percentile.
 
@@ -718,7 +1027,8 @@ GET /groups/:id
 
 #### Get stats of group list<a name="get_group_stats_link"></a>
 
-<hr style="background: #FE6958; height: 2px">
+<hr style="background: #00c434; height: 2px">
+
 
 Retrieves the basic stats of the `Group` list, such as :
 
@@ -748,7 +1058,8 @@ GET /groups/stats
 
 #### Get list of groups<a name="get_group_list_link"></a>
 
-<hr style="background: #FE6958; height: 2px">
+<hr style="background: #00c434; height: 2px">
+
 
 Retrieves a list of `Groups` records, with the total number of groups and detailed information about each group.
 
@@ -811,7 +1122,8 @@ GET /groups
 
 #### Update group<a name="update_group_link"></a>
 
-<hr style="background: #FE6958; height: 2px">
+<hr style="background: #00c434; height: 2px">
+
 
 Updates `Group` record fields and returns it updated. You can alter the `name` and the `capacity` of the group record you created.
 
@@ -850,11 +1162,26 @@ PUT /groups/:id
 
 
 
+##### SSE payload example : 
+
+```typescript
+action: "updated"
+issuedAt: "2022-12-01T20:30:04.008Z"
+issuedBy: "72d6943c-2b64-43bf-8c38-93c83dc4edab"
+message: "Group record has been updated"
+meta: {groupId: '6522739f-c10f-47d9-a0a6-70165041cf06'}
+topic: "Group"
+workspaceId: "72d6943c-2b64-43bf-8c38-93c83dc4edab"
+```
+
+
+
 
 
 #### Archive group<a name="archive_group_link"></a>
 
-<hr style="background: #FE6958; height: 2px">
+<hr style="background: #00c434; height: 2px">
+
 
 Archive `Group` record status. // A bit too late for this now, but I don't think "archivate" is a word 
 
@@ -884,11 +1211,26 @@ PATCH /groups/:id/archivate
 
 
 
+##### SSE payload example : 
+
+```typescript
+action: "archived"
+issuedAt: "2022-12-01T20:30:04.008Z"
+issuedBy: "72d6943c-2b64-43bf-8c38-93c83dc4edab"
+message: "Group record has been sent to the archive"
+meta: {groupId: '6522739f-c10f-47d9-a0a6-70165041cf06'}
+topic: "Group"
+workspaceId: "72d6943c-2b64-43bf-8c38-93c83dc4edab"
+```
+
+
+
 
 
 #### Restore group from archive<a name="restore_group_link"></a>
 
-<hr style="background: #FE6958; height: 2px">
+<hr style="background: #00c434; height: 2px">
+
 
 Restores a `Group` record from the archive.
 
@@ -918,11 +1260,26 @@ PATCH /groups/:id/restore
 
 
 
+##### SSE payload example : 
+
+```typescript
+action: "restored"
+issuedAt: "2022-12-01T20:30:04.008Z"
+issuedBy: "72d6943c-2b64-43bf-8c38-93c83dc4edab"
+message: "Group record has been removed from the archive"
+meta: {groupId: '6522739f-c10f-47d9-a0a6-70165041cf06'}
+topic: "Group"
+workspaceId: "72d6943c-2b64-43bf-8c38-93c83dc4edab"
+```
+
+
+
 
 
 #### Delete group from archive<a name="delete_group_link"></a>
 
-<hr style="background: #FE6958; height: 2px">
+<hr style="background: #00c434; height: 2px">
+
 
 Disabling and deleting `Group` record from archived.
 ```http
@@ -941,6 +1298,109 @@ Status: 204 No content
 
 
 
+##### SSE payload example : 
+
+```typescript
+action: "disabled"
+issuedAt: "2022-12-01T20:30:04.008Z"
+issuedBy: "72d6943c-2b64-43bf-8c38-93c83dc4edab"
+message: "Group record has been disabled irrevensibly"
+meta: {groupId: '6522739f-c10f-47d9-a0a6-70165041cf06'}
+topic: "Group"
+workspaceId: "72d6943c-2b64-43bf-8c38-93c83dc4edab"
+```
+
+
+
+#### Exceptions & Error Handling <a name="exceptions_group_link"></a>
+
+<hr style="background: #FE6958; height: 2px">
+
+##### Record Not Found :
+
+When the desired record is missing or the wrong credentials were provided. 
+
+```json
+{
+	"code": "Group::NotFound",
+    "message": "Specified group record wasn't found.",
+}
+```
+
+---
+
+##### Group Name Already In Use:
+
+When creating an group record, the name of the group should be unique, this is including the archived groups as well.
+
+```json
+{
+    "code": "Group::NameExists",
+    "message": "Given name is already in use. Should be unique."
+}
+```
+
+---
+
+##### Archived Record Restrictions:
+
+In-case of archived records, you could only operate restore or disable.
+
+```json
+{
+    "code": "Group::ArchiveStatusRestriction",
+    "message": "Specified group record is in archive. Could be disabled or restored."
+}
+```
+
+In-case of non-archived records, you would have to archive the record first, in order to disable/delete it.
+
+```json
+{
+    "code": "Group:ArchiveStatusRequired",
+    message: "Specified group record should be moved in archive first."
+}
+```
+
+---
+
+##### Group Overflow:
+
+When there are not more vacancies left for the group to add new person records.
+
+```json
+{
+    "code": "Group::Overflow",
+    "message": "Specified group record hasn't got any vacancies."
+}
+```
+
+---
+
+##### Not Empty :
+
+In-case there's an operation such as `archive` on a non empty group record.
+
+```json
+{
+    "code": "Group::NotEmpty",
+    "message": "Specified group record shouldn't contain persons."
+}
+```
+
+---
+
+##### Unknown
+
+If there would be an case of an unknown Error, there is a high chance of server side error. contact us through email dev@coly.io with detailed information about the error.
+
+```json
+{
+    "code": "Group::Unknown",
+    "message": "Internal service error."
+}
+```
+
 
 
 
@@ -957,7 +1417,8 @@ Status: 204 No content
 
 #### Assign person to group<a name="assign_person_group_link"></a>
 
-<hr style="background: #FE6958; height: 2px">
+<hr style="background: #00c434; height: 2px">
+
 
 Assign a `Person`  to a `Group`. You would need both `groupId` and `personId` to create assignment records.
 
@@ -992,11 +1453,28 @@ POST /assignments
 
 
 
+##### SSE payload example : 
+
+```typescript
+action: "joinded_group",
+issuedAt: "2022-12-01T19:08:05.688Z",
+issuedBy: "72d6943c-2b64-43bf-8c38-93c83dc4edab",
+meta: {
+    groupId: "d11ab67c-270f-46a1-b27d-cace2bfe85bb"
+    personId: "31194cc8-b401-4f71-9c0e-dde956ffade6"
+},
+topic: "Person",
+workspaceId: "72d6943c-2b64-43bf-8c38-93c83dc4edab"
+```
+
+
+
 
 
 #### Remove person from group<a name="remove_person_group_link"></a>
 
-<hr style="background: #FE6958; height: 2px">
+<hr style="background: #00c434; height: 2px">
+
 
 Remove a `Person` from a `Group`. This closes the assignment for specified person by deleting or removing the assignment record. 
 
@@ -1030,7 +1508,60 @@ DELETE /assignments
 
 
 
+##### SSE payload example : 
 
+```typescript
+action: "updated"
+issuedAt: "2022-12-01T19:29:14.195Z"
+issuedBy: "72d6943c-2b64-43bf-8c38-93c83dc4edab"
+message: "Group record has been updated"
+meta: {groupId: 'd11ab67c-270f-46a1-b27d-cace2bfe85bb'}
+topic: "Group"
+workspaceId: "72d6943c-2b64-43bf-8c38-93c83dc4edab"
+```
+
+
+
+#### Exceptions & Error Handling <a name="exceptions_assignments_link"></a>
+
+<hr style="background: #FE6958; height: 2px">
+
+##### Record Not Found :
+
+When the desired record is missing. 
+
+```json
+{
+    "code": "Assignment::NotFound",
+    "message": "Specified assignment record wasn't found."
+}
+```
+
+---
+
+##### Discard Required :
+
+In-case of assigning a person record which is already belongs to another group.
+
+```json
+{
+    "code": "Assignment::DiscardRequired",
+    "message": "Specified assignment record should be discarded first."
+}
+```
+
+---
+
+##### Closed Assignment :
+
+In-case of attempting to change or access a closed assignment record.
+
+ ```json
+ {
+     "code": "Assignment::Closed",
+     "message": "Specified assignment record is already closed"
+ }
+ ```
 
 
 
@@ -1153,13 +1684,13 @@ POST /match
     },
     [
       {
-      	"type": 0,
-      	"id": "4df377f2-d6b0-4540-95f7-3fbc949d0015"
-    	},
-    	{
-      	"type": 0,
-      	"id": "6213111e-741b-43b1-a178-13ab09f62c30"
-    	},
+        "type": 0,
+        "id": "4df377f2-d6b0-4540-95f7-3fbc949d0015"
+      },
+      {
+        "type": 0,
+        "id": "6213111e-741b-43b1-a178-13ab09f62c30"
+      },
     ]
   ]
 }
@@ -1183,3 +1714,33 @@ POST /match
 ]
 ```
 
+
+
+
+### Events (SSE)<a name="api_events_link"></a>
+
+<hr style="background: #4C53FF; height: 3px">
+
+The `Event` end-point serves as a SSE (Server side event), providing an option to enable your client to receive automatic updates from the server via an HTTP connection. 
+
+App event payload :
+
+* `WorkspaceId` User's work space Id
+* `issuedAt` Time stamp of event
+* `issuedBy` Issuer user Id
+* `topic`  The topic of event, such as : `Person`,  `Group` , `System`
+* `action`  The type of event actions, such as :
+
+  * `joined-group`
+  * `left-group` 
+  * `created`
+  * `updated`
+  * `archived`
+  * `restored`
+  * `disabled`
+* `message` short indication of the event
+* `meta` the meta data indicates the target entity of the event, such as : `personId`, `groupId` 
+
+```http
+GET /events
+```
