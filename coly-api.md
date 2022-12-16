@@ -1079,9 +1079,37 @@ GET /groups
 }
 ```
 
+##### Available query options for group statuses:
 
+* Groups that are empty.
 
+  ```http
+  GET /groups?status=empty
+  ```
 
+* Groups that are **not** empty:
+
+  ````http
+  GET /groups?status=!empty
+  ````
+
+* Groups with **all** stats and those who has vacancies:
+
+  ```http
+  GET /groups?status[]=full&status[]=vacant
+  ```
+
+* Groups with **all** stats but excluding `vacant`:
+
+  ```http
+  GET /groups?status[]=full&status[]=!vacant
+  ```
+
+  **NOTE**: By design in query options`exclusive "!*"` flags are **prioritized**, for example:
+
+  in the case above we first select all statuses except `vacant` because the order doesn’t matter. And then we go along `inclusive` or normal flags to include desired. So that the result of the last query is the following: “groups with all statuses excluding `vacant` but including `full`”. You can also exclude several. Duplications would be ignored.
+  
+  
 
 #### Update group<a name="update_group_link"></a>
 
