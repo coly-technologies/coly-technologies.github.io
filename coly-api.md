@@ -15,7 +15,6 @@
     * [Create person](#create_person_link)
     * [Get person information](#get_person_link)
     * [Get a person unique test & profile link](#get_person_test_link)
-    * [Get stats of person list](#get_persons_stats_link)
     * [Get list of persons](#get_persons_list_link)
     * [Update person](#update_person_link)
     * [Person test invitation](#Person_invite_link)
@@ -26,7 +25,6 @@
   * [Groups](#api_groups_link)
     * [Create group](#create_group_link)
     * [Get group information](#get_group_link)
-    * [Get stats of group list](#get_group_stats_link)
     * [Get list of groups](#get_group_list_link)
     * [Update group](#update_group_link)
     * [Archive group](#archive_group_link)
@@ -470,39 +468,6 @@ GET /persons/:id/link
 ```json
 {
   "link": "{{Base_url}}/auth/163326933613260363464326d203666626d223734643d243536353d25663661333131313"
-}
-```
-
-
-
-
-
-#### Get stats of person list<a name="get_persons_stats_link"></a>
-
-<hr style="background: #FE6958; height: 2px">
-
-
-Retrieves the basic stats of the person list, such as:
-
-* `Pending` indicates the `Persons` who received the `Psychometry Test` yet have completed it.
-* `Ready` means the `Persons` who has finished the test and are ready to be matched.
-* `Total` is the total number of `Persons` in the list.
-* `Assigned` indicates the `Persons` who has finished the test and have been assigned to a `Group`.
-
-```http
-GET /persons/stats
-```
-
-
-
-##### Response example
-
-```json
-{
-  "pending": 2,
-  "ready": 1,
-  "total": 7,
-  "assigned": 4
 }
 ```
 
@@ -1047,37 +1012,6 @@ GET /groups/:id
       }
     }
   }
-}
-```
-
-
-
-
-
-#### Get stats of group list<a name="get_group_stats_link"></a>
-
-<hr style="background: #FE6958; height: 2px">
-
-
-Retrieves the basic stats of the `Group` list, such as :
-
-* `Available`, the number of groups with empty spots.
-* `Unavailable`, the number of groups that are full with persons.
-* `Total`, the total number of groups.
-
-```http
-GET /groups/stats
-```
-
-
-
-##### Response example
-
-```json
-{
-  "available": 2,
-  "unavailable": 0,
-  "total": 2
 }
 ```
 
