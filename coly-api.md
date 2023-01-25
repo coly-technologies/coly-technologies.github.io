@@ -1766,13 +1766,16 @@ GET /events
 
 
 
-<hr style="background: #4C53FF; height: 3px">
+
+
+
 
 ### Throttling<a name="api_throttler_link"></a>
 
-In the context of the API, there's a throttler mechanism in place that enforces rate limits on the number of requests that a client can make. This is done to ensure that the API remains responsive and available to all clients, and to prevent one client from monopolizing the resources of the API.
+<hr style="background: #4C53FF; height: 3px">
+In the context of the API, there's a throttler mechanism in place that enforces rate limits on the number of requests that a client can make. This is done to ensure that the API remains responsive and available to all clients, and to prevent one client from monopolizing the resources of the API
 
-When a client exceeds the rate limit, the API will return a `429` error to indicate that the client has exceeded its allowed number of requests. The client should then wait for a certain amount of time before retrying the request. The duration of the waiting time is often included in the response headers in the form of the 'Retry-After' header.
+When a client exceeds the rate limit, the API will return a 429 error to indicate that the client has exceeded its allowed number of requests. The client should wait a certain amount of time before retrying the request. The duration of the waiting time is included in the response headers in the form of the 'Retry-After' header.
 
 ```
 A 429 error, also known as a "Too Many Requests" error, is an HTTP status code that indicates that the user has sent too many requests in a given amount of time. This type of error is typically used to prevent a client from overwhelming a server with too many requests in a short period of time.
@@ -1780,4 +1783,3 @@ A 429 error, also known as a "Too Many Requests" error, is an HTTP status code t
 
 
 
-<hr style="background: #4C53FF; height: 3px">
