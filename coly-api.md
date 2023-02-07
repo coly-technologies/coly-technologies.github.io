@@ -428,7 +428,7 @@ GET /persons/:id
         "extroversion": 100,
         "openness": 100
       },
-      "values": {
+      "coreValues": {
         "selfDirection": 68.1000781861,
         "universalism": 25.6450351837,
         "achievement": 90.2267396403,
@@ -522,7 +522,7 @@ GET /persons
               "extroversion": 100,
               "openness": 100
               },
-          "values": {
+          "coreValues": {
             "selfDirection": 68.1000781861,
             "universalism": 25.6450351837,
             "achievement": 90.2267396403,
@@ -999,7 +999,7 @@ GET /groups/:id
         "extroversion": 85.3010164191,
         "openness": 30.6880375293
         },
-      "values": {
+      "coreValues": {
         "selfDirection": 14.425332290850001,
         "universalism": 15.324472243899999,
         "achievement": 75.29319781075,
@@ -1060,7 +1060,7 @@ GET /groups
           "extroversion": 85.3010164191,
           "openness": 30.6880375293
           },
-          "values": {
+          "coreValues": {
             "selfDirection": 14.425332290850001,
             "universalism": 15.324472243899999,
             "achievement": 75.29319781075,
