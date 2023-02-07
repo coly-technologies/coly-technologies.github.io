@@ -312,7 +312,7 @@ In case of the user's email address has not been verified.
 <hr style="background: #4C53FF; height: 3px">
 
 
-The `Persons` entity mainly refers to the tenants within a shared living space, or persons taking the `Psychometry Test` using our product. Each person will have their `Personality` and `Values` traits calculated after taking the test. The score they get will play a key role in matching the individual to a specific group. 
+The `Persons` entity mainly refers to the tenants within a shared living space, or persons taking the `Psychometry Test` using our product. Each person will have their `Personality` and `coreValues` traits calculated after taking the test. The score they get will play a key role in matching the individual to a specific group. 
 
 
 &nbsp;
@@ -428,7 +428,7 @@ GET /persons/:id
         "extroversion": 100,
         "openness": 100
       },
-      "values": {
+      "coreValues": {
         "selfDirection": 68.1000781861,
         "universalism": 25.6450351837,
         "achievement": 90.2267396403,
@@ -522,7 +522,7 @@ GET /persons
               "extroversion": 100,
               "openness": 100
               },
-          "values": {
+          "coreValues": {
             "selfDirection": 68.1000781861,
             "universalism": 25.6450351837,
             "achievement": 90.2267396403,
@@ -896,7 +896,7 @@ If there is a case of an unknown `Error`, there is a high chance of server-side 
 <hr style="background: #4C53FF; height: 3px">
 
 
-The `Groups` entity is a collection of `Persons`. Usually refers to a group of `Persons` who live in a shared living space. A group is created by `name`, `capacity`, and `persons`. A group with persons contains a calculated average score of the `Personality` and `Values`, scale that can be used to match an incoming person. 
+The `Groups` entity is a collection of `Persons`. Usually refers to a group of `Persons` who live in a shared living space. A group is created by `name`, `capacity`, and `persons`. A group with persons contains a calculated average score of the `Personality` and `coreValues`, scale that can be used to match an incoming person. 
 
 
 
@@ -967,7 +967,7 @@ workspaceId: "72d6943c-2b64-43bf-8c38-93c83dc4edab"
 <hr style="background: #FE6958; height: 2px">
 
 
-Retrieve a single `Group` record with all the detailed pieces of information that you need, including `Personality` and `Values` percentile.
+Retrieve a single `Group` record with all the detailed pieces of information that you need, including `Personality` and `coreValues` percentile.
 
 ```http
 GET /groups/:id
@@ -999,7 +999,7 @@ GET /groups/:id
         "extroversion": 85.3010164191,
         "openness": 30.6880375293
         },
-      "values": {
+      "coreValues": {
         "selfDirection": 14.425332290850001,
         "universalism": 15.324472243899999,
         "achievement": 75.29319781075,
@@ -1060,7 +1060,7 @@ GET /groups
           "extroversion": 85.3010164191,
           "openness": 30.6880375293
           },
-          "values": {
+          "coreValues": {
             "selfDirection": 14.425332290850001,
             "universalism": 15.324472243899999,
             "achievement": 75.29319781075,
