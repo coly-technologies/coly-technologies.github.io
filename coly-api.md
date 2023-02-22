@@ -1583,14 +1583,14 @@ In case of attempting to change or access a closed assignment record:
 <hr style="background: #4C53FF; height: 3px">
 
 
-The `Match` matches a matching source, `one`, to several different matching targets, `many`. `one` can be a single person, single group, or a an array of persons (what we usually refer to as "virtual group"). `many` can be an array with combinations of groups, persons, or also a virtual groups.
+The `Match` function compares a single `source` to multiple `targets`,  and generates an array of scores to indicate the level of compatibility between each source and target. `source` can be a single person, single group, or a an array of persons (what we usually refer to as "virtual group"). `targets` can be an array with combinations of groups, persons, or also a virtual groups.
 
-The response is an array indicating the compability of the matches. The scores are indexed in the same order as the many array in the request. 
+The response is an array indicating the compability of the matches. The scores are indexed in the same order as the targets array in the request. 
 
-* `One` indicates singel matching source.
-* `Many` indicate the array of matching targets.
-* `Type` indicates the type of entity getting matched, `0` as the `Person` and `1` as the `Group`.
-* `Id` as the id of the entity.
+* `source` indicates singel matching source.
+* `targets` indicate the array of matching targets.
+* `type` indicates the type of entity getting matched, `0` as the `Person` and `1` as the `Group`.
+* `id` as the id of the entity.
 
 ```http
 POST /match
@@ -1602,11 +1602,11 @@ POST /match
 
 ```json
 {
-  "one": {
+  "source": {
     "type": 0,
     "id": "a601daf0-fe21-4b02-9659-21c426e9b7a4"
   },
-  "many": [
+  "targets": [
     {
       "type": 1,
       "id": "3747a4ab-a385-4215-9084-5c1479019ba6"
@@ -1636,18 +1636,18 @@ POST /match
 
 
 
-##### Example 2 request body(one is an array of persons, i.e, "virtual group")
+##### Example 2 request body(source is an array of persons, i.e, "virtual group")
 
 ```json
 {
-  "one": [{
+  "source": [{
     "type": 0,
     "id": "a601daf0-fe21-4b02-9659-21c426e9b7a4"
   },{
     "type": 0,
     "id": "1d27c0ab-9c7b-4738-a2fd-0ca013c4de10"
   }],
-  "many": [
+  "targets": [
     {
       "type": 1,
       "id": "3747a4ab-a385-4215-9084-5c1479019ba6"
@@ -1677,24 +1677,24 @@ POST /match
 
 
 
-##### Example 3 request body(many now also includes a virtual group)
+##### Example 3 request body(targets now also includes a virtual group, and a person)
 
 ```json
 {
-  "one": [{
+  "source": [{ 
     "type": 0,
     "id": "a601daf0-fe21-4b02-9659-21c426e9b7a4"
   },{
     "type": 0,
     "id": "1d27c0ab-9c7b-4738-a2fd-0ca013c4de10"
   }],
-  "many": [
+  "targets": [
     {
       "type": 1,
       "id": "3747a4ab-a385-4215-9084-5c1479019ba6"
     },
     {
-      "type": 1,
+      "type": 0,
       "id": "5295a4ab-b456-9385-1056-4a1857492cd7"
     },
     [
