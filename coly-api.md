@@ -11,13 +11,14 @@
 * [API Endpoints](#api_link)
   * [Authentication](#api_authentication_link)
     * [Authentication Exceptions & Error Handling](#exceptions_auth_link) 
+  * [Basic query params](#basic_query_params)
   * [Persons](#api_persons_link)
     * [Create person](#create_person_link)
     * [Get person information](#get_person_link)
-    * [Get a person unique test & profile link](#get_person_test_link)
+    * [Get a person unique assessment & profile link](#get_person_assessment_link)
     * [Get list of persons](#get_persons_list_link)
     * [Update person](#update_person_link)
-    * [Person test invitation](#Person_invite_link)
+    * [Person assessment invitation](#Person_invite_link)
     * [Archive person](#archive_person_link)
     * [Restore person from archive](#restore_person_link)
     * [Delete person from archive](#delete_person_link)
@@ -55,7 +56,7 @@ The Coly ME API Documentation provides descriptive information for developers wh
 The Coly ME engine is provided in four simple steps. 
 
 1. Create a person.
-2. Distribute the link to the person for the test and profile.
+2. Distribute the link to the person for the assessment and profile.
 3. Create a group and assign persons to it.
 4. Match.
 
@@ -307,12 +308,37 @@ In case of the user's email address has not been verified.
 
 
 
+### Basic query params<a name="basic_query_params"></a>
+
+<hr style="background: #4C53FF; height: 3px">
+
+
+For any of the entities below, the following query params are supported when fetching from the backend:
+
+- `pageSize`: The number of records to return per page. This is used for pagination purposes.
+- `pageNumber`: The page number to return. This is used in conjunction with `pageSize` for pagination.
+- `sortDirection`: The sorting direction, either `asc` for ascending or `desc` for descending.
+
+
+
+**Example:**
+
+1. To fetch the first 20 persons in ascending order by their last name and include their personality traits in the response, use the following query:
+
+```http
+GET /persons?pageSize=20&pageNumber=1&sortDirection=asc
+```
+
+
+
+
+
 ### Persons<a name="api_persons_link"></a>
 
 <hr style="background: #4C53FF; height: 3px">
 
 
-The `Persons` entity mainly refers to the tenants within a shared living space, or persons taking the `Psychometry Test` using our product. Each person will have their `Personality` and `coreValues` traits calculated after taking the test. The score they get will play a key role in matching the individual to a specific group. 
+The `Persons` entity mainly refers to the tenants within a shared living space, or persons taking the `Psychometry Assessment` using our product. Each person will have their `Personality` and `coreValues` traits calculated after taking the assessment. The score they get will play a key role in matching the individual to a specific group. 
 
 
 &nbsp;
@@ -451,12 +477,12 @@ GET /persons/:id
 
 
 
-#### Get person unique test & profile link<a name="get_person_test_link"></a>
+#### Get person unique assessment & profile link<a name="get_person_assessment_link"></a>
 
 <hr style="background: #FE6958; height: 2px">
 
 
-Retrieves the `Persons` unique URL link for their `Psychometry Test` and/or `Coly ME profile`. This URL link will take you to the `Coly ME Profile` App (https://profile.coly.io/). By default, when the `Persons` opens the link, the `Psychometry Test` will be presented. When `Psychometry Test` is `Ready`(completed), the link will display the `Persons` `Coly ME profile` with the result from the test.
+Retrieves the `Persons` unique URL link for their `Psychometry Assessment` and/or `Coly ME profile`. This URL link will take you to the `Coly ME Profile` App (https://profile.coly.io/). By default, when the `Persons` opens the link, the `Psychometry Assessment` will be presented. When `Psychometry Assessment` is `Ready`(completed), the link will display the `Persons` `Coly ME profile` with the result from the assessment.
 
 ```http
 GET /persons/:id/link
@@ -546,6 +572,17 @@ GET /persons
 
 
 
+##### Available query options for person relations:
+
+* include groups in persons with the following query param
+
+  ```http
+  GET /persons?relations[]=group
+  ```
+
+
+
+
 
 
 #### Update person<a name="update_person_link"></a>
@@ -555,7 +592,7 @@ GET /persons
 
 
 * Updates `Persons` record fields and returns updated person record.
-* Resends email invitation if pending `Psychometric Test` exists.
+* Resends email invitation if pending `Psychometric Assessment` exists.
 
 ```http
 PUT /persons/:id
@@ -617,12 +654,12 @@ workspaceId: "72d6943c-2b64-43bf-8c38-93c83dc4edab"
 
 
 
-#### Psychometric Test invite <a name="Person_invite_link"> </a>
+#### Psychometric Assessment invite <a name="Person_invite_link"> </a>
 
 <hr style="background: #FE6958; height: 2px">
 
 
-Creates `Psychometric Test` if none and sends email request.
+Creates `Psychometric Assessment` if none and sends email request.
 
 ```http
 GET /persons/:id/invite
@@ -828,7 +865,7 @@ When creating a `Person` record, the user's email should be unique and not be re
 
 ##### Persons Traits Missing
 
-In case of the specific person hasn't completed the psychometry test:
+In case of the specific person hasn't completed the psychometry assessment:
 
 ```json
 {
@@ -1080,6 +1117,8 @@ GET /groups
 }
 ```
 
+
+
 ##### Available query options for group statuses:
 
 * Groups that are empty.
@@ -1106,11 +1145,25 @@ GET /groups
   GET /groups?status[]=full&status[]=!vacant
   ```
 
-  **NOTE**: By design in query options`exclusive "!*"` flags are **prioritized**, for example:
+  
 
+  **NOTE**: By design in query options `exclusive "!*"` flags are **prioritized**, for example:
+  
   in the case above we first select all statuses except `vacant` because the order doesn’t matter. And then we go along `inclusive` or normal flags to include desired. So that the result of the last query is the following: “groups with all statuses excluding `vacant` but including `full`”. You can also exclude several. Duplications would be ignored.
   
-  
+
+
+
+##### Available query options for group relations:
+
+* include persons in groups with the following query param
+
+  ```http
+  GET /groups?relations[]=persons
+  ```
+
+
+
 
 #### Update group<a name="update_group_link"></a>
 
