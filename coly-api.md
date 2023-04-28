@@ -1585,12 +1585,25 @@ In case of attempting to change or access a closed assignment record:
 
 The `Match` function compares a single `source` to multiple `targets`,  and generates an array of scores to indicate the level of compatibility between each source and target. `source` can be a single person, single group, or a an array of persons (what we usually refer to as "virtual group"). `targets` can be an array with combinations of groups, persons, or also a virtual groups.
 
-The response is an array indicating the compability of the matches. The scores are indexed in the same order as the targets array in the request. 
+The response includes an object with a `results` field, which contains an array representing the compatibility of each match. The scores are indexed in the same order as the targets array in the request.
 
-* `source` indicates singel matching source.
-* `targets` indicate the array of matching targets.
-* `type` indicates the type of entity getting matched, `0` as the `Person` and `1` as the `Group`.
-* `id` as the id of the entity.
+* Request fields:
+  - `source`: Represents the single matching source.
+  - `targets`: Represents the array of matching targets.
+  - `type`: Indicates the type of entity being matched, with `person` for a `Person` and `group` for a `Group`.
+  - `id`: Represents the ID of the entity.
+* Response fields:
+  - `results`: Contains an array of matching results, provided in the same order as the request.
+  - `type`: Indicates whether the matching was successful or not, with possible values of `resolved` and `rejected`.
+  - For `type: resolved`:
+    - `score`: A decimal number between 0 and 100, indicating the compatibility of the matches.
+    - `type`: Will have the value "resolved".
+  - For `type: rejected`:
+    - `message`: Provides information about why the matching result could not be calculated.
+    - `code`: Contains the rejection code specific to the reason for the matching rejection.
+    - `type`: Will have the value "rejected".
+
+
 
 ```http
 POST /match
@@ -1603,16 +1616,16 @@ POST /match
 ```json
 {
   "source": {
-    "type": 0,
+    "type": "person",
     "id": "a601daf0-fe21-4b02-9659-21c426e9b7a4"
   },
   "targets": [
     {
-      "type": 1,
+      "type": "group",
       "id": "3747a4ab-a385-4215-9084-5c1479019ba6"
     },
     {
-      "type": 1,
+      "type": "group",
       "id": "5295a4ab-b456-9385-1056-4a1857492cd7"
     }
   ]
@@ -1624,14 +1637,18 @@ POST /match
 ##### Response example: Returns matching score
 
 ```json
-[
-    {
-        "score": 67.415308235859726
-    },
-    {
-        "score": 78.49231287996193
-    }
-]
+{
+    "results": [
+        {
+            "score": 77.92,
+            "type": "resolved"
+        },
+        {
+            "score": 86.24,
+            "type": "resolved"
+        }
+    ],
+}
 ```
 
 
@@ -1641,19 +1658,19 @@ POST /match
 ```json
 {
   "source": [{
-    "type": 0,
+    "type": "person",
     "id": "a601daf0-fe21-4b02-9659-21c426e9b7a4"
   },{
-    "type": 0,
+    "type": "person",
     "id": "1d27c0ab-9c7b-4738-a2fd-0ca013c4de10"
   }],
   "targets": [
     {
-      "type": 1,
+      "type": "group",
       "id": "3747a4ab-a385-4215-9084-5c1479019ba6"
     },
     {
-      "type": 1,
+      "type": "group",
       "id": "5295a4ab-b456-9385-1056-4a1857492cd7"
     }
   ]
@@ -1665,14 +1682,18 @@ POST /match
 ##### Response 2 example: Returns matching score
 
 ```json
-[
-    {
-        "score": 59.57382039583729
-    },
-    {
-        "score": 71.64483092758392
-    }
-]
+{
+    "results": [
+        {
+            "score": 59.57382039583729,
+            "type": "resolved"
+        },
+        {
+            "score": 71.64483092758392,
+            "type": "resolved"
+        }
+    ],
+}
 ```
 
 
@@ -1682,28 +1703,28 @@ POST /match
 ```json
 {
   "source": [{ 
-    "type": 0,
+    "type": "person",
     "id": "a601daf0-fe21-4b02-9659-21c426e9b7a4"
   },{
-    "type": 0,
+    "type": "person",
     "id": "1d27c0ab-9c7b-4738-a2fd-0ca013c4de10"
   }],
   "targets": [
     {
-      "type": 1,
+      "type": "group",
       "id": "3747a4ab-a385-4215-9084-5c1479019ba6"
     },
     {
-      "type": 0,
+      "type": "person",
       "id": "5295a4ab-b456-9385-1056-4a1857492cd7"
     },
     [
       {
-        "type": 0,
+        "type": "person",
         "id": "4df377f2-d6b0-4540-95f7-3fbc949d0015"
       },
       {
-        "type": 0,
+        "type": "person",
         "id": "6213111e-741b-43b1-a178-13ab09f62c30"
       },
     ]
@@ -1716,22 +1737,70 @@ POST /match
 ##### Response 3 example: Returns matching score
 
 ```json
-[
-    {
-        "score": 59.57382039583729
-    },
-    {
-        "score": 71.64483092758392
-    },
-    {
-        "score": 83.83191093758392
-    },  
-]
+{
+    "results": [
+        {
+            "score": 59.57382039583729,
+            "type": "resolved"
+        },
+        {
+            "score": 71.64483092758392,
+            "type": "resolved"
+        },
+        {
+            "score": 83.83191093758392,
+            "type": "resolved"
+        }
+    ],
+}
 ```
 
 
 
+**Example request 4: The second unit happens to be empty**
 
+```
+{
+  "source": {
+    "type": "person",
+    "id": "b601daf0-fe21-4b02-9659-21c426e9b7c7"
+  },
+  "targets": [
+    {
+      "type": "group",
+      "id": "1377a4ab-a385-4215-9084-5c1479019ba6"
+    },
+    {
+      "type": "group",
+      "id": "7201a4ab-b456-9385-1056-4a1857492vg7"
+    }
+  ]
+}
+```
+
+
+
+**Example response 4: The response in case of a rejection** 
+
+```
+{
+    "results": [
+        {
+            "score": 82.92,
+            "type": "resolved"
+        },
+        {
+            "type": "rejected",
+            "message": "There should be no empty source/target. Repeating persons are ignored.",
+            "code": "EmptyUnit"
+        }
+    ],
+}
+```
+
+
+
+**Disclaimer:** Any data present on the object that is not explicitly specified in this document, such as `time` or `_overlapRate`, is not officially supported. These values are subject to change at any time.
 
 
 
