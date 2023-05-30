@@ -937,8 +937,6 @@ GET /groups/c35321c0-a788-46f4-8e8a-b11007915275?relations[]=persons
   "status": "Vacant",
   "psychometry": {
     "updatedAt": "2023-05-30T18:51:43.460Z",
-    "weight": 4,
-    "completeness": 1,
     "traits": {
       "personality": {
         "emotionalStability": 18.7255668491,
