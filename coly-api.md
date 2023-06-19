@@ -9,6 +9,7 @@
 * [Introduction](#intro_link)
 * [Data Lifecycle Description](#description_link)
 * [API Endpoints](#api_link)
+  * [Response structure](#api_authentication_link)
   * [Authentication](#api_authentication_link)
     * [Authentication Exceptions & Error Handling](#exceptions_auth_link) 
   * [Basic query params](#basic_query_params)
@@ -158,28 +159,133 @@ https://me-api.coly.io
 
 
 
-&nbsp;
 
-### Authentication<a name="api_authentication_link"></a>
+
+### Main Response Structure<a name="api_authentication_link"></a>
 <hr style="background: #4C53FF; height: 3px">
+In our API we use the either pattern in all of our responses. This means that almost all our responses give a status 200 response, even when they fail. The distrintion between a failed repsonse and a successful one is determined by the type of the rsponse. Here is a desctiption of the either type using typescript:
 
-Get started by authenticating to our API. Login to your Coly ME account via the `Coly ME Console` application (URL below). The `API-key` is found, or could be generated, from the settings page, integration section, of the console:
+```typescript
+interface Success<T> {
+  type: 'success';
+  value: T;
+}
 
-```http
-https://console.coly.io
+interface Failure<E> {
+  type: 'failure';
+  value: E;
+}
+
+export type Either<E, T> = Failure<E> | Success<T>;
 ```
 
-*Do you not have an account? Please contact Coly Sales team*
+
+
+This means that on the data property of any response you'll get either of these two:
 
 
 
-##### Request Header
+```
+// In case of success:
+{
+    "type": "success",
+    "value": {
+        ... // Value of the data you want to fetch
+    }
+}
 
-Add your `API-key` like below
+
+// In case of failure:
+{
+    "type": "failure",
+    "value": {
+        ... // Error data
+    }
+}
+```
+
+
+
+Technically speaking, in an either scenario, the format of the error data can be specific for different requests. However in our system, all error messages will extend this format:
+
+```typescript
+interface Error {
+	code: FailCode;
+	message: string;
+}
+```
+
+
+
+The message will be human readable, mostly for debugging purposes, and the FailCode will be always be unique and specific for what type of failure occured. The message will always be informative, but it's up for change at any point, so do not rely on it in your application. Instead you can rely on the FailCode, that is designed to be a constant identifier for any specific failure. For each endpoint and request in this API we will describe what values code can be.
+
+
+
+Example of a successfull request/response: 
 
 ```http
-Authorization: Application <API-key>
+GET http://localhost:7001/persons?search=adam
 ```
+
+```json
+{
+    "type": "success",
+    "value": {
+        "total": 1,
+        "list": [
+            {
+                "id": "cdbed044-68c2-4ff8-a221-fc73315f88b9",
+                "createdAt": "2023-06-16T11:04:35.091Z",
+                "createdBy": "f892369b-1cab-4d8c-b24f-4603010975b9",
+                "updatedAt": "2023-06-16T11:04:35.091Z",
+                "updatedBy": "f892369b-1cab-4d8c-b24f-4603010975b9",
+                "archivedAt": null,
+                "archivedBy": null,
+                "firstname": "Adam",
+                "middlename": null,
+                "lastname": "Smith",
+                "email": "adam.smith@gmail.com",
+                "gender": null,
+                "language": null,
+                "city": null,
+                "country": null,
+                "birthDate": null,
+                "birthYear": null,
+                "birthMonth": null,
+                "birthDay": null,
+                "fullname": "Mats Lexell",
+                "status": "Pending",
+                "psychometry": {
+                    "traits": null,
+                    "submittedAt": null,
+                    "requestedAt": "2023-06-16T11:04:35.253Z"
+                }
+            }
+        ],
+        "isDone": true
+    }
+}
+```
+
+
+
+Example of a failed request/response: 
+
+```http
+GET http://localhost:7001/persons/abdca582-43d1-4dd8-f652-ad63451a75ad
+```
+
+```json
+{
+    "type": "failure",
+    "value": {
+        "code": "Person::NotFound",
+        "message": "Specified person record wasn't found."
+    }
+}
+```
+
+
 
 
 
