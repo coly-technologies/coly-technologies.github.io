@@ -183,8 +183,6 @@ export type Either<E, T> = Failure<E> | Success<T>;
 
 This means that on the data property of any response you'll get either of these two:
 
-
-
 ```
 // In case of success:
 {
@@ -242,18 +240,15 @@ GET http://localhost:7001/persons?search=adam
                 "archivedAt": null,
                 "archivedBy": null,
                 "firstname": "Adam",
-                "middlename": null,
                 "lastname": "Smith",
                 "email": "adam.smith@gmail.com",
                 "gender": null,
                 "language": null,
-                "city": null,
                 "country": null,
                 "birthDate": null,
                 "birthYear": null,
                 "birthMonth": null,
                 "birthDay": null,
-                "fullname": "Mats Lexell",
                 "status": "Pending",
                 "psychometry": {
                     "traits": null,
@@ -269,7 +264,7 @@ GET http://localhost:7001/persons?search=adam
 
 
 
-Example of a failed request/response: 
+Example of a failed request/response (lets imagine no person with the id exists): 
 
 ```http
 GET http://localhost:7001/persons/abdca582-43d1-4dd8-f652-ad63451a75ad
@@ -286,6 +281,31 @@ GET http://localhost:7001/persons/abdca582-43d1-4dd8-f652-ad63451a75ad
 ```
 
 
+
+One common failure type between all requests is:
+```
+{
+    "type": "failure",
+    "value": {
+        "code": "InputValidation::Failed",
+        "message": "[Description of the validation fail]"
+    }
+}
+```
+
+This error occures for instance when the format of the request body is wrong.
+
+
+
+**Important:** From this point onwards what we will describe in this API documentation is the structure of the `value` field and the accompanying possible error codes of that request.
+
+
+
+As mentioned above almost all the requests will return status 200 with either success or failure. The exceptions to this is:
+
+* `404` If the call goes to a route that doesn't exist. 
+* `401` If the provided API key is invalid.
+* `500` If there's a system error on our side. This should of course be avoided, and in case it happens is not by design.
 
 
 
