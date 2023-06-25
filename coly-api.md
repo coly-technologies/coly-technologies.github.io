@@ -159,12 +159,12 @@ https://me-api.coly.io
 
 
 
-
-
 ### Main Response Structure<a name="api_authentication_link"></a>
 <hr style="background: #4C53FF; height: 3px">
-In our API we use the either pattern in all of our responses. This means that almost all our responses give a status 200 response, even when they fail. The distrintion between a failed repsonse and a successful one is determined by the type of the rsponse. Here is a desctiption of the either type using typescript:
 
+Our API leverages the Either pattern, a common approach in functional programming, to standardize the structure of all responses. This strategy enables the API to always return a 200 status code, regardless of whether the operation was successful. The outcome of the operation is conveyed in the response's type field, which can be either 'success' or 'failure'.
+
+Note: While the following example uses TypeScript, the 'Either' pattern is language-agnostic and can be adapted to your preferred programming language:
 ```typescript
 interface Success<T> {
   type: 'success';
@@ -179,135 +179,21 @@ interface Failure<E> {
 export type Either<E, T> = Failure<E> | Success<T>;
 ```
 
-
-
-This means that on the data property of any response you'll get either of these two:
-
-```
-// In case of success:
-{
-    "type": "success",
-    "value": {
-        ... // Value of the data you want to fetch
-    }
-}
-
-
-// In case of failure:
-{
-    "type": "failure",
-    "value": {
-        ... // Error data
-    }
-}
-```
-
-
-
-Technically speaking, in an either scenario, the format of the error data can be specific for different requests. However in our system, all error messages will extend this format:
+In every response, you'll find the data property structured as one of the following:
 
 ```typescript
-interface Error {
-	code: FailCode;
-	message: string;
-}
-```
-
-
-
-The message will be human readable, mostly for debugging purposes, and the FailCode will be always be unique and specific for what type of failure occured. The message will always be informative, but it's up for change at any point, so do not rely on it in your application. Instead you can rely on the FailCode, that is designed to be a constant identifier for any specific failure. For each endpoint and request in this API we will describe what values code can be.
-
-
-
-Example of a successfull request/response: 
-
-```http
-GET http://localhost:7001/persons?search=adam
-```
-
-```json
+// Successful response:
 {
     "type": "success",
-    "value": {
-        "total": 1,
-        "list": [
-            {
-                "id": "cdbed044-68c2-4ff8-a221-fc73315f88b9",
-                "createdAt": "2023-06-16T11:04:35.091Z",
-                "createdBy": "f892369b-1cab-4d8c-b24f-4603010975b9",
-                "updatedAt": "2023-06-16T11:04:35.091Z",
-                "updatedBy": "f892369b-1cab-4d8c-b24f-4603010975b9",
-                "archivedAt": null,
-                "archivedBy": null,
-                "firstname": "Adam",
-                "lastname": "Smith",
-                "email": "adam.smith@gmail.com",
-                "gender": null,
-                "language": null,
-                "country": null,
-                "birthDate": null,
-                "birthYear": null,
-                "birthMonth": null,
-                "birthDay": null,
-                "status": "Pending",
-                "psychometry": {
-                    "traits": null,
-                    "submittedAt": null,
-                    "requestedAt": "2023-06-16T11:04:35.253Z"
-                }
-            }
-        ],
-        "isDone": true
-    }
+    "value": { ... } // The requested data
 }
-```
 
-
-
-Example of a failed request/response (lets imagine no person with the id exists): 
-
-```http
-GET http://localhost:7001/persons/abdca582-43d1-4dd8-f652-ad63451a75ad
-```
-
-```json
+// Failed response:
 {
     "type": "failure",
-    "value": {
-        "code": "Person::NotFound",
-        "message": "Specified person record wasn't found."
-    }
+    "value": { ... } // Error data
 }
 ```
-
-
-
-One common failure type between all requests is:
-```
-{
-    "type": "failure",
-    "value": {
-        "code": "InputValidation::Failed",
-        "message": "[Description of the validation fail]"
-    }
-}
-```
-
-This error occures for instance when the format of the request body is wrong.
-
-
-
-**Important:** From this point onwards what we will describe in this API documentation is the structure of the `value` field and the accompanying possible error codes of that request.
-
-
-
-As mentioned above almost all the requests will return status 200 with either success or failure. The exceptions to this is:
-
-* `404` If the call goes to a route that doesn't exist. 
-* `401` If the provided API key is invalid.
-* `500` If there's a system error on our side. This should of course be avoided, and in case it happens is not by design.
-
-
 
 
 
