@@ -8,9 +8,8 @@
 
 * [Introduction](#intro_link)
 * [Data Lifecycle Description](#description_link)
-* [API Endpoints](#api_link)
-  * [Authentication](#api_authentication_link)
-    * [Authentication Exceptions & Error Handling](#exceptions_auth_link) 
+* [API Endpoints & Auth header](#api_link)
+  * [Response structure](#response_structure_link)
   * [Basic query params](#basic_query_params)
   * [Persons](#api_persons_link)
     * [Create person](#create_person_link)
@@ -22,7 +21,7 @@
     * [Archive person](#archive_person_link)
     * [Restore person from archive](#restore_person_link)
     * [Delete person from archive](#delete_person_link)
-    * [Person Exceptions & Error Handeling](#exceptions_person_link)
+    * [Person Error Codes](#error_codes_person_link)
   * [Groups](#api_groups_link)
     * [Create group](#create_group_link)
     * [Get group information](#get_group_link)
@@ -31,15 +30,16 @@
     * [Archive group](#archive_group_link)
     * [Restore group from archive](#restore_group_link)
     * [Delete group from archive](#delete_group_link)
-    * [Group Exceptions & Error Handeling](#exceptions_group_link)
+    * [Group Error Codes](#error_codes_group_link)
   * [Assignments](#api_assignments_link)
     * [Assign person to group](#assign_person_group_link)
     * [Remove person from group](#remove_person_group_link)
-    * [Assignment Exceptions & Error Handling](#exceptions_assignments_link)
+    * [Assignment Error Codes](#error_codes_assignments_link)
   * [Matching](#api_match_link)
     * [Match](#match_link)
     * [Best Match](#best_match_link)
     * [Overlap handling](#overlap_handling_link)
+    * [Match Error Codes](#error_codes_match_link)
   * [Throttling](#api_throttler_link)
   * [Disclaimer](#disclaimer_link)
 
@@ -146,7 +146,7 @@ graph LR;
 
 
 
-## API Endpoints<a name="api_link"></a>
+## API Endpoints & Auth header<a name="api_link"></a>
 <hr style="background: #4C53FF; height: 4px">
 
 Base API URL:
@@ -158,132 +158,145 @@ https://me-api.coly.io
 
 
 
-&nbsp;
+To connect with our API, you will need to generate an API key. Please follow these steps:
 
-### Authentication<a name="api_authentication_link"></a>
+1. Visit your settings page at [Coly Console Settings](https://console.coly.io/settings).
+2. Follow the instructions to generate your unique API key.
+
+After obtaining the API key, include it in all requests by setting the Authorization header as follows:
+
+```http
+Authorization: Application {yourApiKey}
+```
+
+Remember to replace `{yourApiKey}` with your actual API key.
+
+For example:
+```http
+Authorization: Application TfdZmYRpqVbqaHQoMMWKokbGLQPSvYzgjOhHwtRZJWZTeAObAaDbYzVKpnsjiqmf
+```
+
+
+
+
+
+### Main Response Structure<a name="response_structure_link"></a>
 <hr style="background: #4C53FF; height: 3px">
 
-Get started by authenticating to our API. Login to your Coly ME account via the `Coly ME Console` application (URL below). The `API-key` is found, or could be generated, from the settings page, integration section, of the console:
+Our API leverages the Either pattern, a common approach in functional programming, to standardize the structure of all responses. This strategy enables the API to always return a 200 status code, regardless of whether the operation was successful. The outcome of the operation is conveyed in the response's type field, which can be either 'success' or 'failure'.
+
+**Note**: While the following example uses TypeScript, the 'Either' pattern is language-agnostic and can be adapted to your preferred programming language:
+
+```typescript
+interface Success<T> {
+  type: 'success';
+  value: T;
+}
+
+interface Failure<E> {
+  type: 'failure';
+  value: E;
+}
+
+type Either<E, T> = Failure<E> | Success<T>;
+```
+
+
+
+In every response, you'll find the data property structured as one of the following:
+
+```typescript
+// Successful response:
+{
+    "type": "success",
+    "value": { ... } // The requested data
+}
+
+// Failed response:
+{
+    "type": "failure",
+    "value": { ... } // Error data
+}
+```
+
+
+
+The value of a successfull response will vary across different requests, but all error messages will conform to this structure:
+
+```typescript
+interface Error {
+	code: FailCode;
+	message: string;
+}
+```
+
+
+
+In this format, the message field provides a human-readable explanation primarily for debugging. However, it may change over time, so it should not be relied upon for application logic. On the other hand, the `FailCode` is a unique, constant identifier for a specific type of failure and can be used to handle errors in your application.
+
+Every API endpoint will provide a list of possible FailCodes for each request.
+
+
+
+Here are examples of a successful and a failed request:
 
 ```http
-https://console.coly.io
+// Successful request
+GET http://localhost:7001/persons?search=adam
 ```
 
-*Do you not have an account? Please contact Coly Sales team*
+```json
+// Successful response
+{
+    "type": "success",
+    "value": {
+        "total": 1,
+        "list": [ { ... } ] // List of data
+    }
+}
+```
 
 
-
-##### Request Header
-
-Add your `API-key` like below
 
 ```http
-Authorization: Application <API-key>
+// Failed request
+GET http://localhost:7001/persons/abdca582-43d1-4dd8-f652-ad63451a75ad
 ```
 
-
-
-
-
-#### Authentication Exceptions & Error Handling <a name="exceptions_auth_link"></a>
-<hr style="background: #FE6958; height: 2px">
-
-Our API provides customized HTTP response codes. In general there are two components:
-
-
-* `Code` contains two primary pieces of information, the first half indicates the corresponding entity, and the second half indicates the cause of the error.
-* `Message` contains a brief description of the error.
-
-
-
-##### Invalid Access Token
-
-In case of provided access token is invalid:
-
 ```json
+// Failed response
 {
-    "code": "Auth::InvalidAccessToken",
-    "message": "Access token is invalid"
+    "type": "failure",
+    "value": {
+        "code": "Person::NotFound",
+        "message": "Specified person record wasn't found."
+    }
 }
 ```
 
 
 
-##### Expired Access Token
-
-In case of provided access token has expired:
+One common FailCode for all requests is `InputValidation::Failed`, which signifies an issue with the request body format. Example:
 
 ```json
 {
-    "code": "Auth::ExpiredAccessToken",
-    "message": "Access token is expired"
+    "type": "failure",
+    "value": {
+        "code": "InputValidation::Failed",
+        "message": "[Description of the validation fail]"
+    }
 }
 ```
 
 
 
-##### Header Requirement
+For the remainder of this API documentation, we will describe the structure of the 'value' field and the potential FailCodes for each request.
 
-The Bearer access token must be included in the request header:
+Although almost all requests return a 200 status code, there are a few exceptions:
 
-```json
-{
-    "code": "Auth::HeaderRequired",
-    "message": "You need to have bearer token included into request"
-}
-```
-
-
-
-##### Invalid Refresh Token
-
-In case of an invalid refresh token has been passed:
-
-```json
-{
-    "code": "Auth::InvalidRefreshToken",
-    "message": "Refresh token is invalid"
-}
-```
-
-
-
-##### Expired Refresh Token
-
-In case of an expired refresh token has been passed:
-
-```json
-{
-    "code": "Auth::ExpiredRefreshToken",
-    "message": "Refresh token is expired"
-}
-```
-
-
-
-##### Invalid Credentials
-
-In case of invalid password or email address has been passed:
-
-```json
-{
-    "code": "InvalidCredentials",
-    "message": "Email or password is invalid"
-}
-```
-
-
-
-##### Email Verification Required
-
-In case of the user's email address has not been verified.
-
-```json
-{
-    "code": "Auth::EmailVerificationRequired",
-    "message": "Account is not yet verified."
-}
-```
+- `404`: The requested route doesn't exist.
+- `401`: The provided API key is invalid.
+- `500`: A system error occurred on our side. This is unintentional and will be addressed promptly. If this happens please get in touch with the team at Coly.
 
 
 
@@ -587,7 +600,7 @@ PUT /persons/:id
 #### Psychometric Assessment invite <a name="Person_invite_link"> </a>
 <hr style="background: #FE6958; height: 2px">
 
-Creates `Psychometric Assessment` if none and sends email request.
+Creates `Psychometric Assessment` if none exists, and sends email request. If a psychometric assessment already exists a reminder email will be sent.
 
 ```http
 GET /persons/:id/invite
@@ -706,89 +719,46 @@ DELETE /persons/:id
 
 
 
-##### Response example: Person record deleted
-
-```http
-Status: 204 No content
-```
 
 
-
-
-
-#### Person Exceptions & Error Handling <a name="exceptions_person_link"></a>
+#### Person Error Codes <a name="error_codes_person_link"></a>
 <hr style="background: #FE6958; height: 2px">
+Here are the possible error codes for a failure response in the persons route.
 
 ##### Record Not Found
 
-When the desired record is missing, or the wrong credentials are provided:
+When the desired record is missing:
 
 ```json
-{
-    "code": "Person::NotFound",
-    "message": "Specified person record wasn't found.",
-}
+Person::NotFound
 ```
 
 
 
 ##### Email Already In Use
 
-When creating a `Person` record, the user's email should be unique and not be reused unless the person has been completely removed from the platform:
+When creating a `Person` record, the user's email should be unique and not be reused unless the person has been removed from the platform:
 
 ```json
-{
-    "code": "Person::Emailused",
-    "message": "Given email is already in use. Should be unique."
-}
-```
-
-
-
-##### Persons Traits Missing
-
-In case of the specific person hasn't completed the psychometry assessment:
-
-```json
-{
-    "code": "Person::Notraits",
-    "message": "Specified person record should have at least one submitted psychometric test"
-}
+Person::EmailUsed
 ```
 
 
 
 ##### Archived Record Restriction
 
-In case of archived records, they are not allowed to be matched or assigned to groups. To achieve this, you would need to restore the record first or disable/delete it:
+For archived records, they are not allowed to be matched, or assigned to groups. To achieve this, you would need to restore the record first:
 
 ```json
-{
-    "code": "Person::ArchiveStatusRestriction",
-    "message": "Specified person record is in archive. Could be disabled or restored."
-}
-```
-
-In case of non-archived records, you would have to archive the record first to disable/delete it:
-
-```json
-{
-    "code": "Person::ArchiveStatusRequired",
-    message: "Specified person record should be moved in archive first."
-}
+Person::ArchiveStatusRestriction
 ```
 
 
 
-##### Assigned Record Restriction
-
-In case of person records assigned to a specific group, they are allowed to be assigned to up to one group simultaneously:
+For non-archived records, you would have to archive the record first to disable/delete it:
 
 ```json
-{
-    "code": "Person::GroupRestriction",
-    "message": "Specified person record shouldn't be assigned to a group."
-}
+Person::ArchiveStatusRequired
 ```
 
 
@@ -798,10 +768,7 @@ In case of person records assigned to a specific group, they are allowed to be a
 If there is a case of an unknown `Error`, there is a high chance of server-side error. Contact us through our email [dev@coly.io](mailto:dev@coly.io) with detailed information about the error:
 
 ```json
-{
-    "code": "Person::Unknown",
-    "message": "Internal service error."
-}
+Person::Unknown
 ```
 
 
@@ -1219,18 +1186,15 @@ Status: 204 No content
 
 
 
-#### Group Exceptions & Error Handling <a name="exceptions_group_link"></a>
+#### Group Error Codes <a name="error_codes_group_link"></a>
 <hr style="background: #FE6958; height: 2px">
 
 ##### Record Not Found
 
-When the desired record is missing or the wrong credentials are provided:
+When the desired record is missing:
 
 ```json
-{
-	"code": "Group::NotFound",
-    "message": "Specified group record wasn't found.",
-}
+Group::NotFound
 ```
 
 
@@ -1240,45 +1204,25 @@ When the desired record is missing or the wrong credentials are provided:
 When creating a `Group` record, the group's name should be unique. This includes the archived groups as well:
 
 ```json
-{
-    "code": "Group::NameExists",
-    "message": "Given name is already in use. Should be unique."
-}
+Group::TitleUsed
 ```
 
 
 
 ##### Archived Record Restrictions
 
-In case of archived records, you could only operate, restore or disable them:
+For archived records, you'll need restore them before they can be used again:
 
 ```json
-{
-    "code": "Group::ArchiveStatusRestriction",
-    "message": "Specified group record is in archive. Could be disabled or restored."
-}
-```
-
-In case of non-archived records, you would have to archive the record first to disable/delete it:
-
-```json
-{
-    "code": "Group:ArchiveStatusRequired",
-    "message": "Specified group record should be moved in archive first."
-}
+Group::ArchiveStatusRestriction
 ```
 
 
 
-##### Group Overflow
-
-When no vacancies are left for the `group`, add new `person` records:
+For non-archived records, you would have to archive the record first to disable/delete it:
 
 ```json
-{
-    "code": "Group::Overflow",
-    "message": "Specified group record hasn't got any vacancies."
-}
+Group:ArchiveStatusRequired
 ```
 
 
@@ -1288,10 +1232,7 @@ When no vacancies are left for the `group`, add new `person` records:
 In case there's an operation such as archive on a non-empty group record:
 
 ```json
-{
-    "code": "Group::NotEmpty",
-    "message": "Specified group record shouldn't contain persons."
-}
+Group::NotEmpty
 ```
 
 
@@ -1301,10 +1242,7 @@ In case there's an operation such as archive on a non-empty group record:
 If there is a case of an unknown Error, there is a high chance of server-side error. Contact us through email at [dev@coly.io](mailto:dev@coly.io) with detailed information about the error:
 
 ```json
-{
-    "code": "Group::Unknown",
-    "message": "Internal service error."
-}
+Group::Unknown
 ```
 
 
@@ -1395,45 +1333,47 @@ DELETE /assignments
 
 
 
-#### Assignment Exceptions & Error Handling <a name="exceptions_assignments_link"></a>
+#### Assignment Error Codes <a name="error_codes_assignments_link"></a>
 <hr style="background: #FE6958; height: 2px">
+##### Group Overflow
 
-##### Record Not Found
-
-When the desired record is missing:
+When no vacancies are left for the `group`, attempting to assign new `person` records will not be possible:
 
 ```json
-{
-    "code": "Assignment::NotFound",
-    "message": "Specified assignment record wasn't found."
-}
+Group::Overflow
 ```
 
 
 
-##### Discard Required 
+##### Assigned Person Record Restriction
 
-In case of assigning a person record that already belongs to another group:
+Person records are only allowed to be assigned to one group at a time. In case of attempting to assign to multiple groups:
 
 ```json
-{
-    "code": "Assignment::DiscardRequired",
-    "message": "Specified assignment record should be discarded first."
-}
+Person::GroupRestriction
 ```
 
 
 
-##### Closed Assignment
+**Other error codes**
 
-In case of attempting to change or access a closed assignment record:
+These errors can also occure when attempting to assign records. Note that these are described in the person and group routes above:
 
- ```json
-{
-    "code": "Assignment::Closed",
-    "message": "Specified assignment record is already closed"
-}
- ```
+```
+Person::ArchiveStatusRestriction
+```
+
+```
+Person::NotFound
+```
+
+```
+Group::ArchiveStatusRestriction
+```
+
+```
+Group::NotFound
+```
 
 
 
@@ -1766,6 +1706,22 @@ Overlap handling is implemented for all matching requests. It takes into account
 * If the overlap handling process results in either the source or the target becoming empty, the matching request will be rejected.
 
 By applying these rules, the overlap handling ensures that the same person doesn't feature in both the source and target when a match is being calculated, thus maintaining the integrity of the matching process.
+
+
+
+#### Match Error Codes <a name="error_codes_match_link"></a>
+<hr style="background: #FE6958; height: 2px">
+The error codes possible to get from the match endpoint are:
+
+```
+Person::NotFound
+```
+
+```
+Group::NotFound
+```
+
+These are described in the person and group routes.
 
 
 
