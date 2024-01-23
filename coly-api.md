@@ -22,18 +22,18 @@
     * [Restore tenant from archive](#restore_tenant_link)
     * [Delete tenant from archive](#delete_tenant_link)
     * [Tenant Error Codes](#error_codes_tenant_link)
-  * [Groups](#api_groups_link)
-    * [Create group](#create_group_link)
-    * [Get group information](#get_group_link)
-    * [Get list of groups](#get_group_list_link)
-    * [Update group](#update_group_link)
-    * [Archive group](#archive_group_link)
-    * [Restore group from archive](#restore_group_link)
-    * [Delete group from archive](#delete_group_link)
-    * [Group Error Codes](#error_codes_group_link)
+  * [Units](#api_units_link)
+    * [Create unit](#create_unit_link)
+    * [Get unit information](#get_unit_link)
+    * [Get list of units](#get_unit_list_link)
+    * [Update unit](#update_unit_link)
+    * [Archive unit](#archive_unit_link)
+    * [Restore unit from archive](#restore_unit_link)
+    * [Delete unit from archive](#delete_unit_link)
+    * [Unit Error Codes](#error_codes_unit_link)
   * [Assignments](#api_assignments_link)
-    * [Assign tenant to group](#assign_tenant_group_link)
-    * [Remove tenant from group](#remove_tenant_group_link)
+    * [Assign tenant to unit](#assign_tenant_unit_link)
+    * [Remove tenant from unit](#remove_tenant_unit_link)
     * [Assignment Error Codes](#error_codes_assignments_link)
   * [Matching](#api_match_link)
     * [Match](#match_link)
@@ -58,7 +58,7 @@ The Coly ME engine is provided in four simple steps.
 
 1. Create a tenant.
 2. Distribute the link to the tenant for the assessment and profile.
-3. Create a group and assign tenants to it.
+3. Create a unit and assign tenants to it.
 4. Match.
 
 The API endpoints are documented in the same order as the user flow above.
@@ -76,8 +76,8 @@ Our data models have several types(or layers) that define our approach. Simply s
 
 ```mermaid
 graph LR;
-  Group & Tenant --> Assignment --> Feedback
-  Group & Tenant <--- Label
+  Unit & Tenant --> Assignment --> Feedback
+  Unit & Tenant <--- Label
   Tenant --> PsychometricTest
 ```
 
@@ -101,24 +101,24 @@ graph LR;
     Opened -.- Closed
   end
   subgraph Tenant record access available
-    Created -.-> Updated & Joined2Group & LeftGroup -.- Archived
+    Created -.-> Updated & Joined2Unit & LeftUnit -.- Archived
   end
   Archived --> Disabled --> Anonymised
-  Joined2Group ---> Opened
-  LeftGroup ---> Closed
+  Joined2Unit ---> Opened
+  LeftUnit ---> Closed
 ```
 
 - `Created` - Creating an empty tenant record.
 - `Updated` - Update client's payload data.
-- `Joined2Group` - Creates new [`Assignment`](#assignment-model) records thus linking [`Tenant`](#tenant-model) and [`Group`](#group-model).
-- `LeftGroup` - Set's [`Assignment`](#assignment-model) record as inactive
+- `Joined2Unit` - Creates new [`Assignment`](#assignment-model) records thus linking [`Tenant`](#tenant-model) and [`Unit`](#unit-model).
+- `LeftUnit` - Set's [`Assignment`](#assignment-model) record as inactive
 - `Archived` - Changes record access rights, thus making it `read-only`. No updates or any other actions than recovery are available. At the end of the predefined archive record lifetime, it moves to the state `Disabled`
 - `Disabled` - Restricts any further public access to data. Life-time defined by coly data retention policy.
 - `Anonymised` - Record is being stripped from personal or any sensitive information. Further access is intended solely for the ML training unit.
 
 
 
-#### Group model
+#### Unit model
 <hr style="background: #FE6958; height: 2px">
 
 ```mermaid
@@ -126,7 +126,7 @@ graph LR;
   subgraph Assignment model
     Opened -.- Closed
   end
-  subgraph Group record access available
+  subgraph Unit record access available
     Created -.-> Updated & TenantJoined & TenantLeft -.- Archived
   end
   Archived --> Disabled --> Anonymised
@@ -134,9 +134,9 @@ graph LR;
   TenantLeft ---> Closed
 ```
 
-- `Created` - Creating empty group record.
+- `Created` - Creating empty unit record.
 - `Updated` - Update client's payload data.
-- `TenantJoined` - Creates new [`Assignment`](#assignment-model) record thus linking [`Tenant`](#tenant-model) and [`Group`](#group-model).
+- `TenantJoined` - Creates new [`Assignment`](#assignment-model) record thus linking [`Tenant`](#tenant-model) and [`Unit`](#unit-model).
 - `TenantLeft` - Set's [`Assignment`](#assignment-model) record as inactive.
 - `Archived` - Changes record access rights, thus making it `read-only`. No updates or any other actions than recovery are available. At the end of the predefined archive record lifetime, it moves to the state `Disabled`.
 - `Disabled` - Restricts any further public access to data. Life-time defined by coly data retention policy.
@@ -305,7 +305,7 @@ Although almost all requests return a 200 status code, there are a few exception
 ### Basic query params<a name="basic_query_params"></a>
 <hr style="background: #4C53FF; height: 4px">
 
-For any of the entities below (`tenant` and `group`), the following query params are supported when fetching from the backend:
+For any of the entities below (`tenant` and `unit`), the following query params are supported when fetching from the backend:
 
 - `pageSize`: The number of records to return per page. This is used for pagination purposes.
 - `pageNumber`: The page number to return. This is used in conjunction with `pageSize` for pagination.
@@ -328,7 +328,7 @@ GET /tenants?pageSize=20&pageNumber=1&sortDirection=asc
 ### Tenants<a name="api_tenants_link"></a>
 <hr style="background: #4C53FF; height: 4px">
 
-The `Tenants` entity mainly refers to the tenants within a shared living space, or tenants taking the `Psychometry Assessment` using our product. Each tenant will have their `Personality` and `coreValues` traits calculated after taking the assessment. The score they get will play a key role in matching the individual to a specific group. 
+The `Tenants` entity mainly refers to the tenants within a shared living space, or tenants taking the `Psychometry Assessment` using our product. Each tenant will have their `Personality` and `coreValues` traits calculated after taking the assessment. The score they get will play a key role in matching the individual to a specific unit. 
 
 
 &nbsp;
@@ -536,10 +536,10 @@ GET /tenants
 
 ##### Available query options for tenant relations:
 
-* include groups in tenants with the following query param
+* include units in tenants with the following query param
 
   ```http
-  GET /tenants?relations[]=group
+  GET /tenants?relations[]=unit
   ```
 
 
@@ -747,7 +747,7 @@ Tenant::EmailUsed
 
 ##### Archived Record Restriction
 
-For archived records, they are not allowed to be matched, or assigned to groups. To achieve this, you would need to restore the record first:
+For archived records, they are not allowed to be matched, or assigned to units. To achieve this, you would need to restore the record first:
 
 ```json
 Tenant::ArchiveStatusRestriction
@@ -775,22 +775,22 @@ Tenant::Unknown
 
  
 
-### Groups<a name="api_groups_link"></a>
+### Units<a name="api_units_link"></a>
 <hr style="background: #4C53FF; height: 4px">
 
-The `Groups` entity is a collection of `Tenants`. Usually refers to a group of `Tenants` who live in a shared living space. A group is created by `title` and `capacity`. A group with tenants contains a calculated average score of the `personality` and `coreValues`, scale that can be used to match an incoming tenant. 
+The `Units` entity is a collection of `Tenants`. Usually refers to a unit of `Tenants` who live in a shared living space. A unit is created by `title` and `capacity`. A unit with tenants contains a calculated average score of the `personality` and `coreValues`, scale that can be used to match an incoming tenant. 
 
 
 
 
 
-#### Create group<a name="create_group_link"></a>
+#### Create unit<a name="create_unit_link"></a>
 <hr style="background: #FE6958; height: 2px">
 
-Creates `Group` record and returns it. It requires a Group `name` and a `capacity` of tenants for the group.
+Creates `Unit` record and returns it. It requires a Unit `name` and a `capacity` of tenants for the unit.
 
 ```http
-POST /groups
+POST /units
 ```
 
 
@@ -827,13 +827,13 @@ POST /groups
 
 
 
-#### Get group information<a name="get_group_link"></a>
+#### Get unit information<a name="get_unit_link"></a>
 <hr style="background: #FE6958; height: 2px">
 
-Retrieve a single `Group` record with all the detailed pieces of information that you need, including `Personality` and `coreValues` percentile.
+Retrieve a single `Unit` record with all the detailed pieces of information that you need, including `Personality` and `coreValues` percentile.
 
 ```http
-GET /groups/:id
+GET /units/:id
 ```
 
 
@@ -885,7 +885,7 @@ GET /groups/:id
 **Response Example 2**:
 
 ```http
-GET /groups/c35321c0-a788-46f4-8e8a-b11007915275?relations[]=tenants
+GET /units/c35321c0-a788-46f4-8e8a-b11007915275?relations[]=tenants
 ```
 
 ```json
@@ -949,13 +949,13 @@ GET /groups/c35321c0-a788-46f4-8e8a-b11007915275?relations[]=tenants
 
 
 
-#### Get list of groups<a name="get_group_list_link"></a>
+#### Get list of units<a name="get_unit_list_link"></a>
 <hr style="background: #FE6958; height: 2px">
 
-Retrieves a list of `Groups` records, with the total number of groups and detailed information about each group.
+Retrieves a list of `Units` records, with the total number of units and detailed information about each unit.
 
 ```http
-GET /groups
+GET /units
 ```
 
 
@@ -1008,47 +1008,47 @@ GET /groups
 
 
 
-##### Available query options for group statuses:
+##### Available query options for unit statuses:
 
-* Groups that are empty.
+* Units that are empty.
 
   ```http
-  GET /groups?status=empty
+  GET /units?status=empty
   ```
 
-* Groups that are **not** empty:
+* Units that are **not** empty:
 
   ````http
-  GET /groups?status=!empty
+  GET /units?status=!empty
   ````
 
-* Groups with **all** stats and those who has vacancies:
+* Units with **all** stats and those who has vacancies:
 
   ```http
-  GET /groups?status[]=full&status[]=vacant
+  GET /units?status[]=full&status[]=vacant
   ```
 
-* Groups with **all** stats but excluding `vacant`:
+* Units with **all** stats but excluding `vacant`:
 
   ```http
-  GET /groups?status[]=full&status[]=!vacant
+  GET /units?status[]=full&status[]=!vacant
   ```
 
   
 
   **NOTE**: By design in query options `exclusive "!*"` flags are **prioritized**, for example:
   
-  in the case above we first select all statuses except `vacant` because the order doesn’t matter. And then we go along `inclusive` or normal flags to include desired. So that the result of the last query is the following: “groups with all statuses excluding `vacant` but including `full`”. You can also exclude several. Duplications would be ignored.
+  in the case above we first select all statuses except `vacant` because the order doesn’t matter. And then we go along `inclusive` or normal flags to include desired. So that the result of the last query is the following: “units with all statuses excluding `vacant` but including `full`”. You can also exclude several. Duplications would be ignored.
   
 
 
 
-##### Available query options for group relations:
+##### Available query options for unit relations:
 
-* include tenants in groups with the following query param
+* include tenants in units with the following query param
 
   ```http
-  GET /groups?relations[]=tenants
+  GET /units?relations[]=tenants
   ```
 
 
@@ -1056,13 +1056,13 @@ GET /groups
 
 
 
-#### Update group<a name="update_group_link"></a>
+#### Update unit<a name="update_unit_link"></a>
 <hr style="background: #FE6958; height: 2px">
 
-Updates `Group` record fields and returns it updated. You can alter the `name` and the `capacity` of the group record you created.
+Updates `Unit` record fields and returns it updated. You can alter the `name` and the `capacity` of the unit record you created.
 
 ```http
-PUT /groups/:id
+PUT /units/:id
 ```
 
 
@@ -1078,7 +1078,7 @@ PUT /groups/:id
 
 
 
-##### Response example : Changed group capacity
+##### Response example : Changed unit capacity
 
 ```json
 {
@@ -1099,18 +1099,18 @@ PUT /groups/:id
 
 
 
-#### Archive group<a name="archive_group_link"></a>
+#### Archive unit<a name="archive_unit_link"></a>
 <hr style="background: #FE6958; height: 2px">
 
-Archive `Group` record status.
+Archive `Unit` record status.
 
 ```http
-PATCH /groups/:id/archive
+PATCH /units/:id/archive
 ```
 
 
 
-##### Response example : Archive group
+##### Response example : Archive unit
 
 ```json
 {
@@ -1131,18 +1131,18 @@ PATCH /groups/:id/archive
 
 
 
-#### Restore group from archive<a name="restore_group_link"></a>
+#### Restore unit from archive<a name="restore_unit_link"></a>
 <hr style="background: #FE6958; height: 2px">
 
-Restores a `Group` record from the archive.
+Restores a `Unit` record from the archive.
 
 ```http
-PATCH /groups/:id/restore
+PATCH /units/:id/restore
 ```
 
 
 
-##### Response example : Restore the archived group
+##### Response example : Restore the archived unit
 
 ```json
 {
@@ -1163,20 +1163,20 @@ PATCH /groups/:id/restore
 
 
 
-#### Delete group from archive<a name="delete_group_link"></a>
+#### Delete unit from archive<a name="delete_unit_link"></a>
 <hr style="background: #FE6958; height: 2px">
 
-Disabling and deleting `Group` record from archived.
+Disabling and deleting `Unit` record from archived.
 
 ```http
-DELETE /groups/:id
+DELETE /units/:id
 ```
 
 *Note that only the archived records can be deleted.*
 
 
 
-##### Response example: Group record deleted
+##### Response example: Unit record deleted
 
 ```http
 Status: 204 No content
@@ -1186,7 +1186,7 @@ Status: 204 No content
 
 
 
-#### Group Error Codes <a name="error_codes_group_link"></a>
+#### Unit Error Codes <a name="error_codes_unit_link"></a>
 <hr style="background: #FE6958; height: 2px">
 
 ##### Record Not Found
@@ -1194,17 +1194,17 @@ Status: 204 No content
 When the desired record is missing:
 
 ```json
-Group::NotFound
+Unit::NotFound
 ```
 
 
 
-##### Group Name Already In Use
+##### Unit Name Already In Use
 
-When creating a `Group` record, the group's name should be unique. This includes the archived groups as well:
+When creating a `Unit` record, the unit's name should be unique. This includes the archived units as well:
 
 ```json
-Group::TitleUsed
+Unit::TitleUsed
 ```
 
 
@@ -1214,7 +1214,7 @@ Group::TitleUsed
 For archived records, you'll need restore them before they can be used again:
 
 ```json
-Group::ArchiveStatusRestriction
+Unit::ArchiveStatusRestriction
 ```
 
 
@@ -1222,17 +1222,17 @@ Group::ArchiveStatusRestriction
 For non-archived records, you would have to archive the record first to disable/delete it:
 
 ```json
-Group:ArchiveStatusRequired
+Unit:ArchiveStatusRequired
 ```
 
 
 
 ##### Not Empty
 
-In case there's an operation such as archive on a non-empty group record:
+In case there's an operation such as archive on a non-empty unit record:
 
 ```json
-Group::NotEmpty
+Unit::NotEmpty
 ```
 
 
@@ -1242,7 +1242,7 @@ Group::NotEmpty
 If there is a case of an unknown Error, there is a high chance of server-side error. Contact us through email at [dev@coly.io](mailto:dev@coly.io) with detailed information about the error:
 
 ```json
-Group::Unknown
+Unit::Unknown
 ```
 
 
@@ -1252,14 +1252,14 @@ Group::Unknown
 ### Assignments<a name="api_assignments_link"></a>
 <hr style="background: #4C53FF; height: 4px">
 
-`Assignments` are used for adding and removing `Tenants` to and from a `Group`. Assignments are indicating the relation between `Tenants` and `Groups` records. 
+`Assignments` are used for adding and removing `Tenants` to and from a `Unit`. Assignments are indicating the relation between `Tenants` and `Units` records. 
 
 
 
-#### Assign tenant to group<a name="assign_tenant_group_link"></a>
+#### Assign tenant to unit<a name="assign_tenant_unit_link"></a>
 <hr style="background: #FE6958; height: 2px">
 
-Assign a `Tenant`  to a `Group`. You would need both `groupId` and `tenantId` to create assignment records.
+Assign a `Tenant`  to a `Unit`. You would need both `unitId` and `tenantId` to create assignment records.
 
 ```http
 POST /assignments
@@ -1271,7 +1271,7 @@ POST /assignments
 
 ```json
 {
-  "groupId": "3747a4ab-a385-4215-9084-5c1479019ba6",
+  "unitId": "3747a4ab-a385-4215-9084-5c1479019ba6",
   "tenantId": "11131f6e-5654-4d72-bff0-b4d60b1c9b3a"
 }
 ```
@@ -1286,7 +1286,7 @@ POST /assignments
   "createdAt": "2022-11-20T18:21:52.668Z",
   "createdBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
   "leftAt": null,
-  "groupId": "3747a4ab-a385-4215-9084-5c1479019ba6",
+  "unitId": "3747a4ab-a385-4215-9084-5c1479019ba6",
   "tenantId": "11131f6e-5654-4d72-bff0-b4d60b1c9b3a"
 }
 ```
@@ -1295,10 +1295,10 @@ POST /assignments
 
 ##### 
 
-#### Remove tenant from group<a name="remove_tenant_group_link"></a>
+#### Remove tenant from unit<a name="remove_tenant_unit_link"></a>
 <hr style="background: #FE6958; height: 2px">
 
-Remove a `Tenant` from a `Group`. This closes the assignment for specified tenant by deleting or removing the assignment record. 
+Remove a `Tenant` from a `Unit`. This closes the assignment for specified tenant by deleting or removing the assignment record. 
 
 ```http
 DELETE /assignments
@@ -1324,7 +1324,7 @@ DELETE /assignments
   "createdAt": "2022-11-20T18:21:52.668Z",
   "createdBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
   "leftAt": "2022-11-20T18:23:41.404Z",
-  "groupId": "3747a4ab-a385-4215-9084-5c1479019ba6",
+  "unitId": "3747a4ab-a385-4215-9084-5c1479019ba6",
   "tenantId": "11131f6e-5654-4d72-bff0-b4d60b1c9b3a"
 }
 ```
@@ -1335,29 +1335,29 @@ DELETE /assignments
 
 #### Assignment Error Codes <a name="error_codes_assignments_link"></a>
 <hr style="background: #FE6958; height: 2px">
-##### Group Overflow
+##### Unit Overflow
 
-When no vacancies are left for the `group`, attempting to assign new `tenant` records will not be possible:
+When no vacancies are left for the `unit`, attempting to assign new `tenant` records will not be possible:
 
 ```json
-Group::Overflow
+Unit::Overflow
 ```
 
 
 
 ##### Assigned Tenant Record Restriction
 
-Tenant records are only allowed to be assigned to one group at a time. In case of attempting to assign to multiple groups:
+Tenant records are only allowed to be assigned to one unit at a time. In case of attempting to assign to multiple units:
 
 ```json
-Tenant::GroupRestriction
+Tenant::UnitRestriction
 ```
 
 
 
 **Other error codes**
 
-These errors can also occure when attempting to assign records. Note that these are described in the tenant and group routes above:
+These errors can also occure when attempting to assign records. Note that these are described in the tenant and unit routes above:
 
 ```
 Tenant::ArchiveStatusRestriction
@@ -1368,11 +1368,11 @@ Tenant::NotFound
 ```
 
 ```
-Group::ArchiveStatusRestriction
+Unit::ArchiveStatusRestriction
 ```
 
 ```
-Group::NotFound
+Unit::NotFound
 ```
 
 
@@ -1382,25 +1382,25 @@ Group::NotFound
 ### Matching<a name="api_match_link"></a>
 <hr style="background: #4C53FF; height: 4px">
 
-The Matching Engine provides a method for evaluating the compatibility between individuals and groups within our system. Compatibility is quantified using a score ranging from 0 to 100. Detailed below are two endpoints:
+The Matching Engine provides a method for evaluating the compatibility between individuals and units within our system. Compatibility is quantified using a score ranging from 0 to 100. Detailed below are two endpoints:
 
 1. Match - This facilitates matching between a chosen source and target.
 
-2. Best Match - This fetches the most compatible groups or individuals for a given source.
+2. Best Match - This fetches the most compatible units or individuals for a given source.
 
 
 
 #### Match <a name="match_link"></a>
 <hr style="background: #FE6958; height: 2px">
 
-The `Match` function compares a single `source` to multiple `targets`,  and generates an array of scores to indicate the level of compatibility between each source and target. `source` can be a single tenant, single group, or a an array of tenants (what we usually refer to as "virtual group"). `targets` can be an array with combinations of groups, tenants, or also a virtual groups.
+The `Match` function compares a single `source` to multiple `targets`,  and generates an array of scores to indicate the level of compatibility between each source and target. `source` can be a single tenant, single unit, or a an array of tenants (what we usually refer to as "virtual unit"). `targets` can be an array with combinations of units, tenants, or also a virtual units.
 
 The response includes an object with a `results` field, which contains an array representing the compatibility of each match. The scores are indexed in the same order as the targets array in the request.
 
 * Request fields:
   - `source`: Represents the single matching source.
   - `targets`: Represents the array of matching targets.
-  - `type`: Indicates the type of entity being matched, with `tenant` for a `Tenant`, `group` for a `Group`, and `virtualGroup` for an object containing a list of tenants.
+  - `type`: Indicates the type of entity being matched, with `tenant` for a `Tenant`, `unit` for a `Unit`, and `virtualUnit` for an object containing a list of tenants.
   - `id`: Represents the ID of the entity.
 * Response fields:
   - `results`: Contains an array of matching results, provided in the same order as the request.
@@ -1431,11 +1431,11 @@ POST /match
   },
   "targets": [
     {
-      "type": "group",
+      "type": "unit",
       "id": "3747a4ab-a385-4215-9084-5c1479019ba6"
     },
     {
-      "type": "group",
+      "type": "unit",
       "id": "5295a4ab-b456-9385-1056-4a1857492cd7"
     }
   ]
@@ -1463,12 +1463,12 @@ POST /match
 
 
 
-##### Example 2 request body (source is an array of tenants, i.e, "virtual group")
+##### Example 2 request body (source is an array of tenants, i.e, "virtual unit")
 
 ```json
 {
   "source": {
-    "type": "virtualGroup",
+    "type": "virtualUnit",
     "list": [
       {
         "type": "tenant",
@@ -1482,11 +1482,11 @@ POST /match
   },
   "targets": [
     {
-      "type": "group",
+      "type": "unit",
       "id": "3747a4ab-a385-4215-9084-5c1479019ba6"
     },
     {
-      "type": "group",
+      "type": "unit",
       "id": "5295a4ab-b456-9385-1056-4a1857492cd7"
     }
   ]
@@ -1514,7 +1514,7 @@ POST /match
 
 
 
-##### Example 3 request body (targets now also includes a virtual group, and a tenant)
+##### Example 3 request body (targets now also includes a virtual unit, and a tenant)
 
 ```json
 {
@@ -1530,7 +1530,7 @@ POST /match
   ],
   "targets": [
     {
-      "type": "group",
+      "type": "unit",
       "id": "3747a4ab-a385-4215-9084-5c1479019ba6"
     },
     {
@@ -1538,7 +1538,7 @@ POST /match
       "id": "5295a4ab-b456-9385-1056-4a1857492cd7"
     },
     {
-      "type": "virtualGroup",
+      "type": "virtualUnit",
       "list": [
         {
           "type": "tenant",
@@ -1589,11 +1589,11 @@ POST /match
   },
   "targets": [
     {
-      "type": "group",
+      "type": "unit",
       "id": "1377a4ab-a385-4215-9084-5c1479019ba6"
     },
     {
-      "type": "group",
+      "type": "unit",
       "id": "7201a4ab-b456-9385-1056-4a1857492vg7"
     }
   ]
@@ -1631,17 +1631,17 @@ The best match endpoint enables you to locate the best matching entity across th
 
 * Request fields:
   - `source`: Specifies the single source for matching.
-    - `type`: Type of entity being matched, `tenant` for a `Tenant`, `group` for a `Group`, and `virtualGroup` for an object containing a list of tenants (This `source` field is identical to the one in the `/match` endpoint)
+    - `type`: Type of entity being matched, `tenant` for a `Tenant`, `unit` for a `Unit`, and `virtualUnit` for an object containing a list of tenants (This `source` field is identical to the one in the `/match` endpoint)
     - `id`: Represents the ID of the entity.
-  - `targetType`: This field specifies the type of entity you want to be included in your best match results. It can be either `tenant` or `group`.
+  - `targetType`: This field specifies the type of entity you want to be included in your best match results. It can be either `tenant` or `unit`.
 * Response fields:
   - `results`: This field contains an array of match results, presented in descending order from the best match first.
-  - `type`: Indicates the entity type, `group` or `tenant`. 
-  - `entity`: This field pertains to the entity of the matched item, which can be either a group or a tenant, as dictated by the type. For the schema of Group and Tenant entities, refer to the preceding sections.
+  - `type`: Indicates the entity type, `unit` or `tenant`. 
+  - `entity`: This field pertains to the entity of the matched item, which can be either a unit or a tenant, as dictated by the type. For the schema of Unit and Tenant entities, refer to the preceding sections.
   - `score`: The match score.
   
 
-As you may have noted, there are no differences between `resolved` or `rejected` requests - best match will exclusively contain resolved matches. At most, 20 items will be included, but this may be fewer if the system currently lacks a sufficient number of individuals or groups available for matching.
+As you may have noted, there are no differences between `resolved` or `rejected` requests - best match will exclusively contain resolved matches. At most, 20 items will be included, but this may be fewer if the system currently lacks a sufficient number of individuals or units available for matching.
 
 ```http
 POST /match/best
@@ -1654,19 +1654,19 @@ POST /match/best
 ```json
 {
   "source": { "type": "tenant", "id": "d805cf84-1237-4ffd-bbda-f5d66b09ce72" },
-  "targetType": "group"
+  "targetType": "unit"
 }
 ```
 
 
 
-##### Response example: Returns best matching score for tenant to groups
+##### Response example: Returns best matching score for tenant to units
 
 ```json
 {
   "results": [
     {
-      "type": "group",
+      "type": "unit",
       "entity": {
         "id": "ce602e65-1c11-4b53-9d68-d4911c5ec4eb",
         "createdAt": "2023-05-19T11:33:58.759Z",
@@ -1679,7 +1679,7 @@ POST /match/best
       "score": 95.02
     },
     {
-      "type": "group",
+      "type": "unit",
       "entity": {
         "id": "02982527-c090-4024-af39-a565b641c466",
         "createdAt": "2023-05-19T11:33:58.827Z",
@@ -1698,7 +1698,7 @@ POST /match/best
 #### Overlap handling<a name="overlap_handling_link"></a>
 <hr style="background: #FE6958; height: 2px">
 
-Overlap handling is implemented for all matching requests. It takes into account situations where some individuals appearing in the source also exist in the target entities. This may happen, for example, when matching an individual with a group in which they are already a member. The default procedure for managing such scenarios involves the following steps:
+Overlap handling is implemented for all matching requests. It takes into account situations where some individuals appearing in the source also exist in the target entities. This may happen, for example, when matching an individual with a unit in which they are already a member. The default procedure for managing such scenarios involves the following steps:
 
 * If the source contains only one tenant: Any individual with the same ID in the target list is removed before calculating the match result.
 * If the target consists of a single entity: Any individual with the same ID in the source list is removed before calculating the match result.
@@ -1718,10 +1718,10 @@ Tenant::NotFound
 ```
 
 ```
-Group::NotFound
+Unit::NotFound
 ```
 
-These are described in the tenant and group routes.
+These are described in the tenant and unit routes.
 
 
 
