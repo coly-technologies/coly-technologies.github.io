@@ -14,14 +14,13 @@
   * [Tenants](#api_tenants_link)
     * [Create tenant](#create_tenant_link)
     * [Get tenant information](#get_tenant_link)
-    * [Get a tenant unique assessment & profile link](#get_tenant_assessment_link)
     * [Get list of tenants](#get_tenants_list_link)
     * [Update tenant](#update_tenant_link)
-    * [Tenant assessment invitation](#Tenant_invite_link)
     * [Archive tenant](#archive_tenant_link)
     * [Restore tenant from archive](#restore_tenant_link)
     * [Delete tenant from archive](#delete_tenant_link)
     * [Tenant Error Codes](#error_codes_tenant_link)
+  * [Notifications (tenant assessment invitation)](#api_notifications_link)
   * [Units](#api_units_link)
     * [Create unit](#create_unit_link)
     * [Get unit information](#get_unit_link)
@@ -153,7 +152,7 @@ Base API URL:
 
 
 ```http
-https://me-api.coly.io
+https://me-api.coly.io/v1
 ```
 
 
@@ -175,6 +174,12 @@ For example:
 ```http
 Authorization: Application TfdZmYRpqVbqaHQoMMWKokbGLQPSvYzgjOhHwtRZJWZTeAObAaDbYzVKpnsjiqmf
 ```
+
+
+
+**API Versioning:**
+
+The current version of our API is indicated by the `v1` prefix in the base URL. This means all endpoints are accessed under this version. Should there be a transition to a new version (e.g., `v2`), we will provide advance notice and ensure backward compatibility, allowing continued access to `v1` endpoints.
 
 
 
@@ -242,7 +247,7 @@ Here are examples of a successful and a failed request:
 
 ```http
 // Successful request
-GET http://localhost:7001/tenants?search=adam
+GET http://localhost:7001/v1/tenants?search=adam
 ```
 
 ```json
@@ -260,7 +265,7 @@ GET http://localhost:7001/tenants?search=adam
 
 ```http
 // Failed request
-GET http://localhost:7001/tenants/abdca582-43d1-4dd8-f652-ad63451a75ad
+GET http://localhost:7001/v1/tenants/abdca582-43d1-4dd8-f652-ad63451a75ad
 ```
 
 ```json
@@ -328,7 +333,7 @@ GET /tenants?pageSize=20&pageNumber=1&sortDirection=asc
 ### Tenants<a name="api_tenants_link"></a>
 <hr style="background: #4C53FF; height: 4px">
 
-The `Tenants` entity mainly refers to the tenants within a shared living space, or tenants taking the `Psychometry Assessment` using our product. Each tenant will have their `Personality` and `coreValues` traits calculated after taking the assessment. The score they get will play a key role in matching the individual to a specific unit. 
+The `Tenants` entity mainly refers to the tenants within a shared living space, or tenants taking the `Psychometry Assessment` using our product. Each tenant will have their `personality` and `coreValues` traits calculated after taking the assessment. The score they get will play a key role in matching the individual to a specific unit. 
 
 
 &nbsp;
@@ -436,31 +441,25 @@ GET /tenants/:id
       }
     },
     "submittedAt": "2022-10-19T19:47:03.891Z",
-    "requestedAt": "2022-10-19T19:37:03.891Z"
+  },
+  "assignment": {
+    "assignedAt": "2024-01-22T11:26:29.217Z",
+    "assignedBy": "b2555444-5071-7005-4e38-fe7a4f084987",
+    "moveInAt": "2024-01-22T00:00:00.000Z",
+    "unit": {
+      "id": "ea5d0c05-c43f-408c-a650-288e3674c35c",
+      "createdAt": "2024-01-22T11:26:21.716Z",
+      "createdBy": "b2555444-5071-7005-4e38-fe7a4f084987",
+      "updatedAt": "2024-01-22T11:26:29.224Z",
+      "updatedBy": "b2555444-5071-7005-4e38-fe7a4f084987",
+      "archivedAt": null,
+      "archivedBy": null,
+      "title": "Spruce St 66",
+      "capacity": 4,
+      "members": 1,
+      "status": "Vacant"
+    }
   }
-}
-```
-
-
-
-
-
-#### Get tenant unique assessment & profile link<a name="get_tenant_assessment_link"></a>
-<hr style="background: #FE6958; height: 2px">
-
-Retrieves the `Tenants` unique URL link for their `Psychometry Assessment` and/or `Coly ME profile`. This URL link will take you to the `Coly ME Profile` App (https://profile.coly.io/). By default, when the `Tenants` opens the link, the `Psychometry Assessment` will be presented. When `Psychometry Assessment` is `Ready`(completed), the link will display the `Tenants` `Coly ME profile` with the result from the assessment.
-
-```http
-GET /tenants/:id/link
-```
-
-
-
-##### Response example
-
-```json
-{
-  "link": "{{Base_url}}/auth/163326933613260363464326d203666626d223734643d243536353d25663661333131313"
 }
 ```
 
@@ -494,9 +493,9 @@ GET /tenants
       "updatedBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
       "archivedAt": null,
       "archivedBy": null,
-      "firstname": "Test",
-      "lastname": "erfan",
-      "email": "erfan@coly.io",
+      "firstname": "John",
+      "lastname": "Doe",
+      "email": "john.doe@coly.io",
       "gender": null,
       "language": null,
       "country": null,
@@ -524,7 +523,6 @@ GET /tenants
           }
         },
         "submittedAt": "2022-10-19T19:47:03.891Z",
-        "requestedAt": "2022-10-19T19:37:03.891Z"
       }
     }
   ],
@@ -597,17 +595,6 @@ PUT /tenants/:id
 
 
 
-#### Psychometric Assessment invite <a name="Tenant_invite_link"> </a>
-<hr style="background: #FE6958; height: 2px">
-
-Creates `Psychometric Assessment` if none exists, and sends email request. If a psychometric assessment already exists a reminder email will be sent.
-
-```http
-GET /tenants/:id/invite
-```
-
-
-
 #### Archive tenant<a name="archive_tenant_link"></a>
 <hr style="background: #FE6958; height: 2px">
 
@@ -660,7 +647,6 @@ PATCH /tenants/:id/archive
       }
     },
     "submittedAt": "2023-05-19T11:34:04.535Z",
-    "requestedAt": "2023-05-19T11:34:02.396Z"
   }
 }
 ```
@@ -775,6 +761,36 @@ Tenant::Unknown
 
  
 
+### Notifications<a name="api_notifications_link"></a>
+<hr style="background: #4C53FF; height: 4px">
+
+To initiate the assessment process for a tenant, use the endpoint below. This action triggers an automated email sequence to encourage the tenant to complete their psychometric assessment. The sequence includes an initial invitation followed by reminders if the assessment isn't completed within specific intervals.
+
+```http
+POST /notifications/invite/tenant
+```
+
+
+
+**Behavior:**
+
+Upon invoking this endpoint, an email is dispatched to the specified tenant, marking the commencement of a notification chain. If the tenant does not complete the assessment within 3 days, they receive a follow-up reminder. A final reminder is sent if the assessment remains incomplete 5 days after the initial email. Triggering this endpoint for a tenant will reset any existing reminder sequences for them, starting the process anew.
+
+
+##### Example request body
+
+```json
+{
+  "tenantId": "5a7cc372-8d04-4d33-8186-41416ebd41e5",
+}
+```
+
+A successful request returns `{"type": "success"}`, indicating the email sequence has been initiated. If the tenant cannot be found, the response will be `{"type": "failure"}`, accompanied by a failcode of `Tenant::NotFound`.
+
+
+
+
+
 ### Units<a name="api_units_link"></a>
 <hr style="background: #4C53FF; height: 4px">
 
@@ -830,7 +846,7 @@ POST /units
 #### Get unit information<a name="get_unit_link"></a>
 <hr style="background: #FE6958; height: 2px">
 
-Retrieve a single `Unit` record with all the detailed pieces of information that you need, including `Personality` and `coreValues` percentile.
+Retrieve a single `Unit` record with all the detailed pieces of information that you need, including `personality` and `coreValues` percentile.
 
 ```http
 GET /units/:id
@@ -854,7 +870,7 @@ GET /units/:id
   "members": 4,
   "status": "Vacant",
   "psychometry": {
-    "updatedAt": "2023-05-30T16:31:34.350Z",
+    "completeness": 1,
     "traits": {
       "personality": {
         "emotionalStability": 18.7255668491,
@@ -926,20 +942,40 @@ GET /units/c35321c0-a788-46f4-8e8a-b11007915275?relations[]=tenants
       }
     }
   },
-  "tenants": [
+  "assignments": [
     {
       "assignedAt": "2023-05-29T16:33:01.043Z",
       "assignedBy": "f892369b-1cab-4d8c-b24f-4603010975b9",
-      "id": "f50df97f-3a47-4ee4-b2d1-05e4f52153d1",
-      "createdAt": "2023-05-29T16:32:59.676Z"
-      // ... etc
+      "moveInAt": "2023-05-31T16:33:01.043Z",
+      "tenant": {
+        "id": "7dc424e6-f29f-4043-b2ce-41bddebad81a",
+        "createdAt": "2023-04-12T16:33:01.043Z",
+        "createdBy": "f892369b-1cab-4d8c-b24f-4603010975b9",
+        "updatedAt": "2023-10-12T16:33:01.043Z",
+        "updatedBy": "f892369b-1cab-4d8c-b24f-4603010975b9",
+        "archivedAt": null,
+        "archivedBy": null,
+        "firstname": "Kristine",
+        "lastname": "Hess"
+        // ... etc
+      }
     },
     {
-      "assignedAt": "2023-05-29T16:33:01.062Z",
+      "assignedAt": "2023-06-02T16:33:01.043Z",
       "assignedBy": "f892369b-1cab-4d8c-b24f-4603010975b9",
-      "id": "d20669bf-d132-4afc-a21b-6d1be0d9a0f8",
-      "createdAt": "2023-05-29T16:32:59.689Z"
-      // ... etc
+      "moveInAt": "2023-06-05T16:33:01.043Z",
+      "tenant": {
+        "id": "03bb42d4-e9f3-43e7-9dd3-777434f7d1a5",
+        "createdAt": "2023-05-20T12:29:01.043Z",
+        "createdBy": "f892369b-1cab-4d8c-b24f-4603010975b9",
+        "updatedAt": "2023-07-20T12:29:01.043Z",
+        "updatedBy": "f892369b-1cab-4d8c-b24f-4603010975b9",
+        "archivedAt": null,
+        "archivedBy": null,
+        "firstname": "Susannah",
+        "lastname": "Nesbitt"
+        // ... etc
+      }
     }
   ]
 }
@@ -1280,20 +1316,17 @@ POST /assignments
 
 ##### Response example
 
+The response will be an empty response, with the either pattern indicating success or failure. For example:
+
 ```json
 {
-  "id": "e73c70d1-76a1-4038-b42e-10892b4f1857",
-  "createdAt": "2022-11-20T18:21:52.668Z",
-  "createdBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
-  "leftAt": null,
-  "unitId": "3747a4ab-a385-4215-9084-5c1479019ba6",
-  "tenantId": "11131f6e-5654-4d72-bff0-b4d60b1c9b3a"
+  "type": "success",
 }
 ```
 
 
 
-##### 
+
 
 #### Remove tenant from unit<a name="remove_tenant_unit_link"></a>
 <hr style="background: #FE6958; height: 2px">
@@ -1318,14 +1351,11 @@ DELETE /assignments
 
 ##### Response example
 
+Same philosophy as in the POST /assignments endpoint. For example:
+
 ```json
 {
-  "id": "e73c70d1-76a1-4038-b42e-10892b4f1857",
-  "createdAt": "2022-11-20T18:21:52.668Z",
-  "createdBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
-  "leftAt": "2022-11-20T18:23:41.404Z",
-  "unitId": "3747a4ab-a385-4215-9084-5c1479019ba6",
-  "tenantId": "11131f6e-5654-4d72-bff0-b4d60b1c9b3a"
+  "type": "success",
 }
 ```
 
@@ -1335,6 +1365,7 @@ DELETE /assignments
 
 #### Assignment Error Codes <a name="error_codes_assignments_link"></a>
 <hr style="background: #FE6958; height: 2px">
+
 ##### Unit Overflow
 
 When no vacancies are left for the `unit`, attempting to assign new `tenant` records will not be possible:
