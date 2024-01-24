@@ -1,7 +1,7 @@
 # Coly ME (Match Engine) API documentation
 <hr style="background: #4C53FF; height: 5px">
 
-<h6>Version 1.0</h6>
+<h6>Version 1.18</h6>
 
 
 ### Table of contents
@@ -11,29 +11,28 @@
 * [API Endpoints & Auth header](#api_link)
   * [Response structure](#response_structure_link)
   * [Basic query params](#basic_query_params)
-  * [Persons](#api_persons_link)
-    * [Create person](#create_person_link)
-    * [Get person information](#get_person_link)
-    * [Get a person unique assessment & profile link](#get_person_assessment_link)
-    * [Get list of persons](#get_persons_list_link)
-    * [Update person](#update_person_link)
-    * [Person assessment invitation](#Person_invite_link)
-    * [Archive person](#archive_person_link)
-    * [Restore person from archive](#restore_person_link)
-    * [Delete person from archive](#delete_person_link)
-    * [Person Error Codes](#error_codes_person_link)
-  * [Groups](#api_groups_link)
-    * [Create group](#create_group_link)
-    * [Get group information](#get_group_link)
-    * [Get list of groups](#get_group_list_link)
-    * [Update group](#update_group_link)
-    * [Archive group](#archive_group_link)
-    * [Restore group from archive](#restore_group_link)
-    * [Delete group from archive](#delete_group_link)
-    * [Group Error Codes](#error_codes_group_link)
+  * [Tenants](#api_tenants_link)
+    * [Create tenant](#create_tenant_link)
+    * [Get tenant information](#get_tenant_link)
+    * [Get list of tenants](#get_tenants_list_link)
+    * [Update tenant](#update_tenant_link)
+    * [Archive tenant](#archive_tenant_link)
+    * [Restore tenant from archive](#restore_tenant_link)
+    * [Delete tenant from archive](#delete_tenant_link)
+    * [Tenant Error Codes](#error_codes_tenant_link)
+  * [Notifications (tenant assessment invitation)](#api_notifications_link)
+  * [Units](#api_units_link)
+    * [Create unit](#create_unit_link)
+    * [Get unit information](#get_unit_link)
+    * [Get list of units](#get_unit_list_link)
+    * [Update unit](#update_unit_link)
+    * [Archive unit](#archive_unit_link)
+    * [Restore unit from archive](#restore_unit_link)
+    * [Delete unit from archive](#delete_unit_link)
+    * [Unit Error Codes](#error_codes_unit_link)
   * [Assignments](#api_assignments_link)
-    * [Assign person to group](#assign_person_group_link)
-    * [Remove person from group](#remove_person_group_link)
+    * [Assign tenant to unit](#assign_tenant_unit_link)
+    * [Remove tenant from unit](#remove_tenant_unit_link)
     * [Assignment Error Codes](#error_codes_assignments_link)
   * [Matching](#api_match_link)
     * [Match](#match_link)
@@ -56,9 +55,9 @@ The Coly ME API Documentation provides descriptive information for developers wh
 
 The Coly ME engine is provided in four simple steps. 
 
-1. Create a person.
-2. Distribute the link to the person for the assessment and profile.
-3. Create a group and assign persons to it.
+1. Create a tenant.
+2. Distribute the link to the tenant for the assessment and profile.
+3. Create a unit and assign tenants to it.
 4. Match.
 
 The API endpoints are documented in the same order as the user flow above.
@@ -76,9 +75,9 @@ Our data models have several types(or layers) that define our approach. Simply s
 
 ```mermaid
 graph LR;
-  Group & Person --> Assignment --> Feedback
-  Group & Person <--- Label
-  Person --> PsychometricTest
+  Unit & Tenant --> Assignment --> Feedback
+  Unit & Tenant <--- Label
+  Tenant --> PsychometricTest
 ```
 
 *Diagram1: Visualisation of model dependencies*
@@ -92,7 +91,7 @@ Core-level models contain crucial data for system operations.
 
 
 
-#### Person model
+#### Tenant model
 <hr style="background: #FE6958; height: 2px">
 
 ```mermaid
@@ -100,25 +99,25 @@ graph LR;
   subgraph Assignment model
     Opened -.- Closed
   end
-  subgraph Person record access available
-    Created -.-> Updated & Joined2Group & LeftGroup -.- Archived
+  subgraph Tenant record access available
+    Created -.-> Updated & Joined2Unit & LeftUnit -.- Archived
   end
   Archived --> Disabled --> Anonymised
-  Joined2Group ---> Opened
-  LeftGroup ---> Closed
+  Joined2Unit ---> Opened
+  LeftUnit ---> Closed
 ```
 
-- `Created` - Creating an empty person record.
+- `Created` - Creating an empty tenant record.
 - `Updated` - Update client's payload data.
-- `Joined2Group` - Creates new [`Assignment`](#assignment-model) records thus linking [`Person`](#person-model) and [`Group`](#group-model).
-- `LeftGroup` - Set's [`Assignment`](#assignment-model) record as inactive
+- `Joined2Unit` - Creates new [`Assignment`](#assignment-model) records thus linking [`Tenant`](#tenant-model) and [`Unit`](#unit-model).
+- `LeftUnit` - Set's [`Assignment`](#assignment-model) record as inactive
 - `Archived` - Changes record access rights, thus making it `read-only`. No updates or any other actions than recovery are available. At the end of the predefined archive record lifetime, it moves to the state `Disabled`
 - `Disabled` - Restricts any further public access to data. Life-time defined by coly data retention policy.
 - `Anonymised` - Record is being stripped from personal or any sensitive information. Further access is intended solely for the ML training unit.
 
 
 
-#### Group model
+#### Unit model
 <hr style="background: #FE6958; height: 2px">
 
 ```mermaid
@@ -126,18 +125,18 @@ graph LR;
   subgraph Assignment model
     Opened -.- Closed
   end
-  subgraph Group record access available
-    Created -.-> Updated & PersonJoined & PersonLeft -.- Archived
+  subgraph Unit record access available
+    Created -.-> Updated & TenantJoined & TenantLeft -.- Archived
   end
   Archived --> Disabled --> Anonymised
-  PersonJoined ---> Opened
-  PersonLeft ---> Closed
+  TenantJoined ---> Opened
+  TenantLeft ---> Closed
 ```
 
-- `Created` - Creating empty group record.
+- `Created` - Creating empty unit record.
 - `Updated` - Update client's payload data.
-- `PersonJoined` - Creates new [`Assignment`](#assignment-model) record thus linking [`Person`](#person-model) and [`Group`](#group-model).
-- `PersonLeft` - Set's [`Assignment`](#assignment-model) record as inactive.
+- `TenantJoined` - Creates new [`Assignment`](#assignment-model) record thus linking [`Tenant`](#tenant-model) and [`Unit`](#unit-model).
+- `TenantLeft` - Set's [`Assignment`](#assignment-model) record as inactive.
 - `Archived` - Changes record access rights, thus making it `read-only`. No updates or any other actions than recovery are available. At the end of the predefined archive record lifetime, it moves to the state `Disabled`.
 - `Disabled` - Restricts any further public access to data. Life-time defined by coly data retention policy.
 - `Anonymised` - Record is being stripped from personal or any sensitive information. Further access is intended solely for the ML training unit.
@@ -153,7 +152,7 @@ Base API URL:
 
 
 ```http
-https://me-api.coly.io
+https://me-api.coly.io/v1
 ```
 
 
@@ -175,6 +174,12 @@ For example:
 ```http
 Authorization: Application TfdZmYRpqVbqaHQoMMWKokbGLQPSvYzgjOhHwtRZJWZTeAObAaDbYzVKpnsjiqmf
 ```
+
+
+
+**API Versioning:**
+
+The current version of our API is indicated by the `v1` prefix in the base URL. This means all endpoints are accessed under this version. Should there be a transition to a new version (e.g., `v2`), we will provide advance notice and ensure backward compatibility, allowing continued access to `v1` endpoints.
 
 
 
@@ -242,7 +247,7 @@ Here are examples of a successful and a failed request:
 
 ```http
 // Successful request
-GET http://localhost:7001/persons?search=adam
+GET http://localhost:7001/v1/tenants?search=adam
 ```
 
 ```json
@@ -260,7 +265,7 @@ GET http://localhost:7001/persons?search=adam
 
 ```http
 // Failed request
-GET http://localhost:7001/persons/abdca582-43d1-4dd8-f652-ad63451a75ad
+GET http://localhost:7001/v1/tenants/abdca582-43d1-4dd8-f652-ad63451a75ad
 ```
 
 ```json
@@ -268,8 +273,8 @@ GET http://localhost:7001/persons/abdca582-43d1-4dd8-f652-ad63451a75ad
 {
     "type": "failure",
     "value": {
-        "code": "Person::NotFound",
-        "message": "Specified person record wasn't found."
+        "code": "Tenant::NotFound",
+        "message": "Specified tenant record wasn't found."
     }
 }
 ```
@@ -305,7 +310,7 @@ Although almost all requests return a 200 status code, there are a few exception
 ### Basic query params<a name="basic_query_params"></a>
 <hr style="background: #4C53FF; height: 4px">
 
-For any of the entities below (`person` and `group`), the following query params are supported when fetching from the backend:
+For any of the entities below (`tenant` and `unit`), the following query params are supported when fetching from the backend:
 
 - `pageSize`: The number of records to return per page. This is used for pagination purposes.
 - `pageNumber`: The page number to return. This is used in conjunction with `pageSize` for pagination.
@@ -315,32 +320,32 @@ For any of the entities below (`person` and `group`), the following query params
 
 **Example:**
 
-1. To fetch the first 20 persons in ascending order by their last name and include their personality traits in the response, use the following query:
+1. To fetch the first 20 tenants in ascending order by their last name and include their personality traits in the response, use the following query:
 
 ```http
-GET /persons?pageSize=20&pageNumber=1&sortDirection=asc
+GET /tenants?pageSize=20&pageNumber=1&sortDirection=asc
 ```
 
 
 
 
 
-### Persons<a name="api_persons_link"></a>
+### Tenants<a name="api_tenants_link"></a>
 <hr style="background: #4C53FF; height: 4px">
 
-The `Persons` entity mainly refers to the tenants within a shared living space, or persons taking the `Psychometry Assessment` using our product. Each person will have their `Personality` and `coreValues` traits calculated after taking the assessment. The score they get will play a key role in matching the individual to a specific group. 
+The `Tenants` entity mainly refers to the tenants within a shared living space, or tenants taking the `Psychometry Assessment` using our product. Each tenant will have their `personality` and `coreValues` traits calculated after taking the assessment. The score they get will play a key role in matching the individual to a specific unit. 
 
 
 &nbsp;
 
 
-#### Create person<a name="create_person_link"></a>
+#### Create tenant<a name="create_tenant_link"></a>
 <hr style="background: #FE6958; height: 2px">
 
-Creates `Persons` record and returns it. It requires `email` , `firstname`, `lastname` to create a `Persons` record.
+Creates `Tenants` record and returns it. It requires `email` , `firstname`, `lastname` to create a `Tenants` record.
 
 ```http
-POST /persons
+POST /tenants
 ```
 
 
@@ -383,14 +388,14 @@ POST /persons
 
 
 
-#### Get person information<a name="get_person_link"></a>
+#### Get tenant information<a name="get_tenant_link"></a>
 <hr style="background: #FE6958; height: 2px">
 
-Retrieve a single person's record with all the detailed pieces of information that you need.
+Retrieve a single tenant's record with all the detailed pieces of information that you need.
 
 
 ```http
-GET /persons/:id
+GET /tenants/:id
 ```
 
 
@@ -436,7 +441,24 @@ GET /persons/:id
       }
     },
     "submittedAt": "2022-10-19T19:47:03.891Z",
-    "requestedAt": "2022-10-19T19:37:03.891Z"
+  },
+  "assignment": {
+    "assignedAt": "2024-01-22T11:26:29.217Z",
+    "assignedBy": "b2555444-5071-7005-4e38-fe7a4f084987",
+    "moveInAt": "2024-01-22T00:00:00.000Z",
+    "unit": {
+      "id": "ea5d0c05-c43f-408c-a650-288e3674c35c",
+      "createdAt": "2024-01-22T11:26:21.716Z",
+      "createdBy": "b2555444-5071-7005-4e38-fe7a4f084987",
+      "updatedAt": "2024-01-22T11:26:29.224Z",
+      "updatedBy": "b2555444-5071-7005-4e38-fe7a4f084987",
+      "archivedAt": null,
+      "archivedBy": null,
+      "title": "Spruce St 66",
+      "capacity": 4,
+      "members": 1,
+      "status": "Vacant"
+    }
   }
 }
 ```
@@ -445,37 +467,14 @@ GET /persons/:id
 
 
 
-#### Get person unique assessment & profile link<a name="get_person_assessment_link"></a>
+#### Get list of tenants<a name="get_tenants_list_link"></a>
 <hr style="background: #FE6958; height: 2px">
 
-Retrieves the `Persons` unique URL link for their `Psychometry Assessment` and/or `Coly ME profile`. This URL link will take you to the `Coly ME Profile` App (https://profile.coly.io/). By default, when the `Persons` opens the link, the `Psychometry Assessment` will be presented. When `Psychometry Assessment` is `Ready`(completed), the link will display the `Persons` `Coly ME profile` with the result from the assessment.
-
-```http
-GET /persons/:id/link
-```
-
-
-
-##### Response example
-
-```json
-{
-  "link": "{{Base_url}}/auth/163326933613260363464326d203666626d223734643d243536353d25663661333131313"
-}
-```
-
-
-
-
-
-#### Get list of persons<a name="get_persons_list_link"></a>
-<hr style="background: #FE6958; height: 2px">
-
-Retrieves the list of person's records, with the total number of `Persons` and their detailed pieces of information.
+Retrieves the list of tenant's records, with the total number of `Tenants` and their detailed pieces of information.
 
 
 ```http
-GET /persons
+GET /tenants
 ```
 
 
@@ -494,9 +493,9 @@ GET /persons
       "updatedBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
       "archivedAt": null,
       "archivedBy": null,
-      "firstname": "Test",
-      "lastname": "erfan",
-      "email": "erfan@coly.io",
+      "firstname": "John",
+      "lastname": "Doe",
+      "email": "john.doe@coly.io",
       "gender": null,
       "language": null,
       "country": null,
@@ -524,7 +523,6 @@ GET /persons
           }
         },
         "submittedAt": "2022-10-19T19:47:03.891Z",
-        "requestedAt": "2022-10-19T19:37:03.891Z"
       }
     }
   ],
@@ -534,12 +532,12 @@ GET /persons
 
 
 
-##### Available query options for person relations:
+##### Available query options for tenant relations:
 
-* include groups in persons with the following query param
+* include units in tenants with the following query param
 
   ```http
-  GET /persons?relations[]=group
+  GET /tenants?relations[]=unit
   ```
 
 
@@ -547,14 +545,14 @@ GET /persons
 
 
 
-#### Update person<a name="update_person_link"></a>
+#### Update tenant<a name="update_tenant_link"></a>
 <hr style="background: #FE6958; height: 2px">
 
-* Updates `Persons` record fields and returns updated person record.
+* Updates `Tenants` record fields and returns updated tenant record.
 * Resends email invitation if pending `Psychometric Assessment` exists.
 
 ```http
-PUT /persons/:id
+PUT /tenants/:id
 ```
 
 
@@ -571,7 +569,7 @@ PUT /persons/:id
 
 
 
-##### Response example : Changed person name
+##### Response example : Changed tenant name
 
 ```json
 {
@@ -597,29 +595,18 @@ PUT /persons/:id
 
 
 
-#### Psychometric Assessment invite <a name="Person_invite_link"> </a>
+#### Archive tenant<a name="archive_tenant_link"></a>
 <hr style="background: #FE6958; height: 2px">
 
-Creates `Psychometric Assessment` if none exists, and sends email request. If a psychometric assessment already exists a reminder email will be sent.
+Archive `Tenants` record status.
 
 ```http
-GET /persons/:id/invite
+PATCH /tenants/:id/archive
 ```
 
 
 
-#### Archive person<a name="archive_person_link"></a>
-<hr style="background: #FE6958; height: 2px">
-
-Archive `Persons` record status.
-
-```http
-PATCH /persons/:id/archive
-```
-
-
-
-##### Response example : Archive person
+##### Response example : Archive tenant
 
 ```json
 {
@@ -660,7 +647,6 @@ PATCH /persons/:id/archive
       }
     },
     "submittedAt": "2023-05-19T11:34:04.535Z",
-    "requestedAt": "2023-05-19T11:34:02.396Z"
   }
 }
 ```
@@ -669,18 +655,18 @@ PATCH /persons/:id/archive
 
 
 
-#### Restore person from archive<a name="restore_person_link"></a>
+#### Restore tenant from archive<a name="restore_tenant_link"></a>
 <hr style="background: #FE6958; height: 2px">
 
-Restores a `Persons` record from the archive.
+Restores a `Tenants` record from the archive.
 
 ```http
-PATCH /persons/:id/restore
+PATCH /tenants/:id/restore
 ```
 
 
 
-##### Response example : Restore the achived person
+##### Response example : Restore the achived tenant
 
 ```json
 {
@@ -706,13 +692,13 @@ PATCH /persons/:id/restore
 
 
 
-#### Delete person from archive<a name="delete_person_link"></a>
+#### Delete tenant from archive<a name="delete_tenant_link"></a>
 <hr style="background: #FE6958; height: 2px">
 
-Disabling and deleting `Persons` record from archived.
+Disabling and deleting `Tenants` record from archived.
 
 ```http
-DELETE /persons/:id
+DELETE /tenants/:id
 ```
 
 *Note that only the archived records can be deleted.*
@@ -721,36 +707,36 @@ DELETE /persons/:id
 
 
 
-#### Person Error Codes <a name="error_codes_person_link"></a>
+#### Tenant Error Codes <a name="error_codes_tenant_link"></a>
 <hr style="background: #FE6958; height: 2px">
-Here are the possible error codes for a failure response in the persons route.
+Here are the possible error codes for a failure response in the tenants route.
 
 ##### Record Not Found
 
 When the desired record is missing:
 
 ```json
-Person::NotFound
+Tenant::NotFound
 ```
 
 
 
 ##### Email Already In Use
 
-When creating a `Person` record, the user's email should be unique and not be reused unless the person has been removed from the platform:
+When creating a `Tenant` record, the user's email should be unique and not be reused unless the tenant has been removed from the platform:
 
 ```json
-Person::EmailUsed
+Tenant::EmailUsed
 ```
 
 
 
 ##### Archived Record Restriction
 
-For archived records, they are not allowed to be matched, or assigned to groups. To achieve this, you would need to restore the record first:
+For archived records, they are not allowed to be matched, or assigned to units. To achieve this, you would need to restore the record first:
 
 ```json
-Person::ArchiveStatusRestriction
+Tenant::ArchiveStatusRestriction
 ```
 
 
@@ -758,7 +744,7 @@ Person::ArchiveStatusRestriction
 For non-archived records, you would have to archive the record first to disable/delete it:
 
 ```json
-Person::ArchiveStatusRequired
+Tenant::ArchiveStatusRequired
 ```
 
 
@@ -768,29 +754,59 @@ Person::ArchiveStatusRequired
 If there is a case of an unknown `Error`, there is a high chance of server-side error. Contact us through our email [dev@coly.io](mailto:dev@coly.io) with detailed information about the error:
 
 ```json
-Person::Unknown
+Tenant::Unknown
 ```
 
 
 
  
 
-### Groups<a name="api_groups_link"></a>
+### Notifications<a name="api_notifications_link"></a>
 <hr style="background: #4C53FF; height: 4px">
 
-The `Groups` entity is a collection of `Persons`. Usually refers to a group of `Persons` who live in a shared living space. A group is created by `title` and `capacity`. A group with persons contains a calculated average score of the `personality` and `coreValues`, scale that can be used to match an incoming person. 
-
-
-
-
-
-#### Create group<a name="create_group_link"></a>
-<hr style="background: #FE6958; height: 2px">
-
-Creates `Group` record and returns it. It requires a Group `name` and a `capacity` of persons for the group.
+To initiate the assessment process for a tenant, use the endpoint below. This action triggers an automated email sequence to encourage the tenant to complete their psychometric assessment. The sequence includes an initial invitation followed by reminders if the assessment isn't completed within specific intervals.
 
 ```http
-POST /groups
+POST /notifications/invite/tenant
+```
+
+
+
+**Behavior:**
+
+Upon invoking this endpoint, an email is dispatched to the specified tenant, marking the commencement of a notification chain. If the tenant does not complete the assessment within 3 days, they receive a follow-up reminder. A final reminder is sent if the assessment remains incomplete 5 days after the initial email. Triggering this endpoint for a tenant will reset any existing reminder sequences for them, starting the process anew.
+
+
+##### Example request body
+
+```json
+{
+  "tenantId": "5a7cc372-8d04-4d33-8186-41416ebd41e5",
+}
+```
+
+A successful request returns `{"type": "success"}`, indicating the email sequence has been initiated. If the tenant cannot be found, the response will be `{"type": "failure"}`, accompanied by a failcode of `Tenant::NotFound`.
+
+
+
+
+
+### Units<a name="api_units_link"></a>
+<hr style="background: #4C53FF; height: 4px">
+
+The `Units` entity is a collection of `Tenants`. Usually refers to a unit of `Tenants` who live in a shared living space. A unit is created by `title` and `capacity`. A unit with tenants contains a calculated average score of the `personality` and `coreValues`, scale that can be used to match an incoming tenant. 
+
+
+
+
+
+#### Create unit<a name="create_unit_link"></a>
+<hr style="background: #FE6958; height: 2px">
+
+Creates `Unit` record and returns it. It requires a Unit `name` and a `capacity` of tenants for the unit.
+
+```http
+POST /units
 ```
 
 
@@ -827,13 +843,13 @@ POST /groups
 
 
 
-#### Get group information<a name="get_group_link"></a>
+#### Get unit information<a name="get_unit_link"></a>
 <hr style="background: #FE6958; height: 2px">
 
-Retrieve a single `Group` record with all the detailed pieces of information that you need, including `Personality` and `coreValues` percentile.
+Retrieve a single `Unit` record with all the detailed pieces of information that you need, including `personality` and `coreValues` percentile.
 
 ```http
-GET /groups/:id
+GET /units/:id
 ```
 
 
@@ -854,7 +870,7 @@ GET /groups/:id
   "members": 4,
   "status": "Vacant",
   "psychometry": {
-    "updatedAt": "2023-05-30T16:31:34.350Z",
+    "completeness": 1,
     "traits": {
       "personality": {
         "emotionalStability": 18.7255668491,
@@ -885,7 +901,7 @@ GET /groups/:id
 **Response Example 2**:
 
 ```http
-GET /groups/c35321c0-a788-46f4-8e8a-b11007915275?relations[]=persons
+GET /units/c35321c0-a788-46f4-8e8a-b11007915275?relations[]=tenants
 ```
 
 ```json
@@ -926,20 +942,40 @@ GET /groups/c35321c0-a788-46f4-8e8a-b11007915275?relations[]=persons
       }
     }
   },
-  "persons": [
+  "assignments": [
     {
       "assignedAt": "2023-05-29T16:33:01.043Z",
       "assignedBy": "f892369b-1cab-4d8c-b24f-4603010975b9",
-      "id": "f50df97f-3a47-4ee4-b2d1-05e4f52153d1",
-      "createdAt": "2023-05-29T16:32:59.676Z"
-      // ... etc
+      "moveInAt": "2023-05-31T16:33:01.043Z",
+      "tenant": {
+        "id": "7dc424e6-f29f-4043-b2ce-41bddebad81a",
+        "createdAt": "2023-04-12T16:33:01.043Z",
+        "createdBy": "f892369b-1cab-4d8c-b24f-4603010975b9",
+        "updatedAt": "2023-10-12T16:33:01.043Z",
+        "updatedBy": "f892369b-1cab-4d8c-b24f-4603010975b9",
+        "archivedAt": null,
+        "archivedBy": null,
+        "firstname": "Kristine",
+        "lastname": "Hess"
+        // ... etc
+      }
     },
     {
-      "assignedAt": "2023-05-29T16:33:01.062Z",
+      "assignedAt": "2023-06-02T16:33:01.043Z",
       "assignedBy": "f892369b-1cab-4d8c-b24f-4603010975b9",
-      "id": "d20669bf-d132-4afc-a21b-6d1be0d9a0f8",
-      "createdAt": "2023-05-29T16:32:59.689Z"
-      // ... etc
+      "moveInAt": "2023-06-05T16:33:01.043Z",
+      "tenant": {
+        "id": "03bb42d4-e9f3-43e7-9dd3-777434f7d1a5",
+        "createdAt": "2023-05-20T12:29:01.043Z",
+        "createdBy": "f892369b-1cab-4d8c-b24f-4603010975b9",
+        "updatedAt": "2023-07-20T12:29:01.043Z",
+        "updatedBy": "f892369b-1cab-4d8c-b24f-4603010975b9",
+        "archivedAt": null,
+        "archivedBy": null,
+        "firstname": "Susannah",
+        "lastname": "Nesbitt"
+        // ... etc
+      }
     }
   ]
 }
@@ -949,13 +985,13 @@ GET /groups/c35321c0-a788-46f4-8e8a-b11007915275?relations[]=persons
 
 
 
-#### Get list of groups<a name="get_group_list_link"></a>
+#### Get list of units<a name="get_unit_list_link"></a>
 <hr style="background: #FE6958; height: 2px">
 
-Retrieves a list of `Groups` records, with the total number of groups and detailed information about each group.
+Retrieves a list of `Units` records, with the total number of units and detailed information about each unit.
 
 ```http
-GET /groups
+GET /units
 ```
 
 
@@ -1008,47 +1044,47 @@ GET /groups
 
 
 
-##### Available query options for group statuses:
+##### Available query options for unit statuses:
 
-* Groups that are empty.
+* Units that are empty.
 
   ```http
-  GET /groups?status=empty
+  GET /units?status=empty
   ```
 
-* Groups that are **not** empty:
+* Units that are **not** empty:
 
   ````http
-  GET /groups?status=!empty
+  GET /units?status=!empty
   ````
 
-* Groups with **all** stats and those who has vacancies:
+* Units with **all** stats and those who has vacancies:
 
   ```http
-  GET /groups?status[]=full&status[]=vacant
+  GET /units?status[]=full&status[]=vacant
   ```
 
-* Groups with **all** stats but excluding `vacant`:
+* Units with **all** stats but excluding `vacant`:
 
   ```http
-  GET /groups?status[]=full&status[]=!vacant
+  GET /units?status[]=full&status[]=!vacant
   ```
 
   
 
   **NOTE**: By design in query options `exclusive "!*"` flags are **prioritized**, for example:
   
-  in the case above we first select all statuses except `vacant` because the order doesn’t matter. And then we go along `inclusive` or normal flags to include desired. So that the result of the last query is the following: “groups with all statuses excluding `vacant` but including `full`”. You can also exclude several. Duplications would be ignored.
+  in the case above we first select all statuses except `vacant` because the order doesn’t matter. And then we go along `inclusive` or normal flags to include desired. So that the result of the last query is the following: “units with all statuses excluding `vacant` but including `full`”. You can also exclude several. Duplications would be ignored.
   
 
 
 
-##### Available query options for group relations:
+##### Available query options for unit relations:
 
-* include persons in groups with the following query param
+* include tenants in units with the following query param
 
   ```http
-  GET /groups?relations[]=persons
+  GET /units?relations[]=tenants
   ```
 
 
@@ -1056,13 +1092,13 @@ GET /groups
 
 
 
-#### Update group<a name="update_group_link"></a>
+#### Update unit<a name="update_unit_link"></a>
 <hr style="background: #FE6958; height: 2px">
 
-Updates `Group` record fields and returns it updated. You can alter the `name` and the `capacity` of the group record you created.
+Updates `Unit` record fields and returns it updated. You can alter the `name` and the `capacity` of the unit record you created.
 
 ```http
-PUT /groups/:id
+PUT /units/:id
 ```
 
 
@@ -1078,7 +1114,7 @@ PUT /groups/:id
 
 
 
-##### Response example : Changed group capacity
+##### Response example : Changed unit capacity
 
 ```json
 {
@@ -1099,18 +1135,18 @@ PUT /groups/:id
 
 
 
-#### Archive group<a name="archive_group_link"></a>
+#### Archive unit<a name="archive_unit_link"></a>
 <hr style="background: #FE6958; height: 2px">
 
-Archive `Group` record status.
+Archive `Unit` record status.
 
 ```http
-PATCH /groups/:id/archive
+PATCH /units/:id/archive
 ```
 
 
 
-##### Response example : Archive group
+##### Response example : Archive unit
 
 ```json
 {
@@ -1131,18 +1167,18 @@ PATCH /groups/:id/archive
 
 
 
-#### Restore group from archive<a name="restore_group_link"></a>
+#### Restore unit from archive<a name="restore_unit_link"></a>
 <hr style="background: #FE6958; height: 2px">
 
-Restores a `Group` record from the archive.
+Restores a `Unit` record from the archive.
 
 ```http
-PATCH /groups/:id/restore
+PATCH /units/:id/restore
 ```
 
 
 
-##### Response example : Restore the archived group
+##### Response example : Restore the archived unit
 
 ```json
 {
@@ -1163,20 +1199,20 @@ PATCH /groups/:id/restore
 
 
 
-#### Delete group from archive<a name="delete_group_link"></a>
+#### Delete unit from archive<a name="delete_unit_link"></a>
 <hr style="background: #FE6958; height: 2px">
 
-Disabling and deleting `Group` record from archived.
+Disabling and deleting `Unit` record from archived.
 
 ```http
-DELETE /groups/:id
+DELETE /units/:id
 ```
 
 *Note that only the archived records can be deleted.*
 
 
 
-##### Response example: Group record deleted
+##### Response example: Unit record deleted
 
 ```http
 Status: 204 No content
@@ -1186,7 +1222,7 @@ Status: 204 No content
 
 
 
-#### Group Error Codes <a name="error_codes_group_link"></a>
+#### Unit Error Codes <a name="error_codes_unit_link"></a>
 <hr style="background: #FE6958; height: 2px">
 
 ##### Record Not Found
@@ -1194,17 +1230,17 @@ Status: 204 No content
 When the desired record is missing:
 
 ```json
-Group::NotFound
+Unit::NotFound
 ```
 
 
 
-##### Group Name Already In Use
+##### Unit Name Already In Use
 
-When creating a `Group` record, the group's name should be unique. This includes the archived groups as well:
+When creating a `Unit` record, the unit's name should be unique. This includes the archived units as well:
 
 ```json
-Group::TitleUsed
+Unit::TitleUsed
 ```
 
 
@@ -1214,7 +1250,7 @@ Group::TitleUsed
 For archived records, you'll need restore them before they can be used again:
 
 ```json
-Group::ArchiveStatusRestriction
+Unit::ArchiveStatusRestriction
 ```
 
 
@@ -1222,17 +1258,17 @@ Group::ArchiveStatusRestriction
 For non-archived records, you would have to archive the record first to disable/delete it:
 
 ```json
-Group:ArchiveStatusRequired
+Unit:ArchiveStatusRequired
 ```
 
 
 
 ##### Not Empty
 
-In case there's an operation such as archive on a non-empty group record:
+In case there's an operation such as archive on a non-empty unit record:
 
 ```json
-Group::NotEmpty
+Unit::NotEmpty
 ```
 
 
@@ -1242,7 +1278,7 @@ Group::NotEmpty
 If there is a case of an unknown Error, there is a high chance of server-side error. Contact us through email at [dev@coly.io](mailto:dev@coly.io) with detailed information about the error:
 
 ```json
-Group::Unknown
+Unit::Unknown
 ```
 
 
@@ -1252,14 +1288,14 @@ Group::Unknown
 ### Assignments<a name="api_assignments_link"></a>
 <hr style="background: #4C53FF; height: 4px">
 
-`Assignments` are used for adding and removing `Persons` to and from a `Group`. Assignments are indicating the relation between `Persons` and `Groups` records. 
+`Assignments` are used for adding and removing `Tenants` to and from a `Unit`. Assignments are indicating the relation between `Tenants` and `Units` records. 
 
 
 
-#### Assign person to group<a name="assign_person_group_link"></a>
+#### Assign tenant to unit<a name="assign_tenant_unit_link"></a>
 <hr style="background: #FE6958; height: 2px">
 
-Assign a `Person`  to a `Group`. You would need both `groupId` and `personId` to create assignment records.
+Assign a `Tenant`  to a `Unit`. You would need both `unitId` and `tenantId` to create assignment records.
 
 ```http
 POST /assignments
@@ -1271,8 +1307,8 @@ POST /assignments
 
 ```json
 {
-  "groupId": "3747a4ab-a385-4215-9084-5c1479019ba6",
-  "personId": "11131f6e-5654-4d72-bff0-b4d60b1c9b3a"
+  "unitId": "3747a4ab-a385-4215-9084-5c1479019ba6",
+  "tenantId": "11131f6e-5654-4d72-bff0-b4d60b1c9b3a"
 }
 ```
 
@@ -1280,25 +1316,22 @@ POST /assignments
 
 ##### Response example
 
+The response will be an empty response, with the either pattern indicating success or failure. For example:
+
 ```json
 {
-  "id": "e73c70d1-76a1-4038-b42e-10892b4f1857",
-  "createdAt": "2022-11-20T18:21:52.668Z",
-  "createdBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
-  "leftAt": null,
-  "groupId": "3747a4ab-a385-4215-9084-5c1479019ba6",
-  "personId": "11131f6e-5654-4d72-bff0-b4d60b1c9b3a"
+  "type": "success",
 }
 ```
 
 
 
-##### 
 
-#### Remove person from group<a name="remove_person_group_link"></a>
+
+#### Remove tenant from unit<a name="remove_tenant_unit_link"></a>
 <hr style="background: #FE6958; height: 2px">
 
-Remove a `Person` from a `Group`. This closes the assignment for specified person by deleting or removing the assignment record. 
+Remove a `Tenant` from a `Unit`. This closes the assignment for specified tenant by deleting or removing the assignment record. 
 
 ```http
 DELETE /assignments
@@ -1310,7 +1343,7 @@ DELETE /assignments
 
 ```json
 {
-  "personId": "11131f6e-5654-4d72-bff0-b4d60b1c9b3a"
+  "tenantId": "11131f6e-5654-4d72-bff0-b4d60b1c9b3a"
 }
 ```
 
@@ -1318,14 +1351,11 @@ DELETE /assignments
 
 ##### Response example
 
+Same philosophy as in the POST /assignments endpoint. For example:
+
 ```json
 {
-  "id": "e73c70d1-76a1-4038-b42e-10892b4f1857",
-  "createdAt": "2022-11-20T18:21:52.668Z",
-  "createdBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
-  "leftAt": "2022-11-20T18:23:41.404Z",
-  "groupId": "3747a4ab-a385-4215-9084-5c1479019ba6",
-  "personId": "11131f6e-5654-4d72-bff0-b4d60b1c9b3a"
+  "type": "success",
 }
 ```
 
@@ -1335,44 +1365,45 @@ DELETE /assignments
 
 #### Assignment Error Codes <a name="error_codes_assignments_link"></a>
 <hr style="background: #FE6958; height: 2px">
-##### Group Overflow
 
-When no vacancies are left for the `group`, attempting to assign new `person` records will not be possible:
+##### Unit Overflow
+
+When no vacancies are left for the `unit`, attempting to assign new `tenant` records will not be possible:
 
 ```json
-Group::Overflow
+Unit::Overflow
 ```
 
 
 
-##### Assigned Person Record Restriction
+##### Assigned Tenant Record Restriction
 
-Person records are only allowed to be assigned to one group at a time. In case of attempting to assign to multiple groups:
+Tenant records are only allowed to be assigned to one unit at a time. In case of attempting to assign to multiple units:
 
 ```json
-Person::GroupRestriction
+Tenant::UnitRestriction
 ```
 
 
 
 **Other error codes**
 
-These errors can also occure when attempting to assign records. Note that these are described in the person and group routes above:
+These errors can also occure when attempting to assign records. Note that these are described in the tenant and unit routes above:
 
 ```
-Person::ArchiveStatusRestriction
-```
-
-```
-Person::NotFound
+Tenant::ArchiveStatusRestriction
 ```
 
 ```
-Group::ArchiveStatusRestriction
+Tenant::NotFound
 ```
 
 ```
-Group::NotFound
+Unit::ArchiveStatusRestriction
+```
+
+```
+Unit::NotFound
 ```
 
 
@@ -1382,25 +1413,25 @@ Group::NotFound
 ### Matching<a name="api_match_link"></a>
 <hr style="background: #4C53FF; height: 4px">
 
-The Matching Engine provides a method for evaluating the compatibility between individuals and groups within our system. Compatibility is quantified using a score ranging from 0 to 100. Detailed below are two endpoints:
+The Matching Engine provides a method for evaluating the compatibility between individuals and units within our system. Compatibility is quantified using a score ranging from 0 to 100. Detailed below are two endpoints:
 
 1. Match - This facilitates matching between a chosen source and target.
 
-2. Best Match - This fetches the most compatible groups or individuals for a given source.
+2. Best Match - This fetches the most compatible units or individuals for a given source.
 
 
 
 #### Match <a name="match_link"></a>
 <hr style="background: #FE6958; height: 2px">
 
-The `Match` function compares a single `source` to multiple `targets`,  and generates an array of scores to indicate the level of compatibility between each source and target. `source` can be a single person, single group, or a an array of persons (what we usually refer to as "virtual group"). `targets` can be an array with combinations of groups, persons, or also a virtual groups.
+The `Match` function compares a single `source` to multiple `targets`,  and generates an array of scores to indicate the level of compatibility between each source and target. `source` can be a single tenant, single unit, or a an array of tenants (what we usually refer to as "virtual unit"). `targets` can be an array with combinations of units, tenants, or also a virtual units.
 
 The response includes an object with a `results` field, which contains an array representing the compatibility of each match. The scores are indexed in the same order as the targets array in the request.
 
 * Request fields:
   - `source`: Represents the single matching source.
   - `targets`: Represents the array of matching targets.
-  - `type`: Indicates the type of entity being matched, with `person` for a `Person`, `group` for a `Group`, and `virtualGroup` for an object containing a list of persons.
+  - `type`: Indicates the type of entity being matched, with `tenant` for a `Tenant`, `unit` for a `Unit`, and `virtualUnit` for an object containing a list of tenants.
   - `id`: Represents the ID of the entity.
 * Response fields:
   - `results`: Contains an array of matching results, provided in the same order as the request.
@@ -1426,16 +1457,16 @@ POST /match
 ```json
 {
   "source": {
-    "type": "person",
+    "type": "tenant",
     "id": "a601daf0-fe21-4b02-9659-21c426e9b7a4"
   },
   "targets": [
     {
-      "type": "group",
+      "type": "unit",
       "id": "3747a4ab-a385-4215-9084-5c1479019ba6"
     },
     {
-      "type": "group",
+      "type": "unit",
       "id": "5295a4ab-b456-9385-1056-4a1857492cd7"
     }
   ]
@@ -1463,30 +1494,30 @@ POST /match
 
 
 
-##### Example 2 request body (source is an array of persons, i.e, "virtual group")
+##### Example 2 request body (source is an array of tenants, i.e, "virtual unit")
 
 ```json
 {
   "source": {
-    "type": "virtualGroup",
+    "type": "virtualUnit",
     "list": [
       {
-        "type": "person",
+        "type": "tenant",
         "id": "a601daf0-fe21-4b02-9659-21c426e9b7a4"
       },
       {
-        "type": "person",
+        "type": "tenant",
         "id": "1d27c0ab-9c7b-4738-a2fd-0ca013c4de10"
       }
     ]
   },
   "targets": [
     {
-      "type": "group",
+      "type": "unit",
       "id": "3747a4ab-a385-4215-9084-5c1479019ba6"
     },
     {
-      "type": "group",
+      "type": "unit",
       "id": "5295a4ab-b456-9385-1056-4a1857492cd7"
     }
   ]
@@ -1514,38 +1545,38 @@ POST /match
 
 
 
-##### Example 3 request body (targets now also includes a virtual group, and a person)
+##### Example 3 request body (targets now also includes a virtual unit, and a tenant)
 
 ```json
 {
   "source": [
     {
-      "type": "person",
+      "type": "tenant",
       "id": "a601daf0-fe21-4b02-9659-21c426e9b7a4"
     },
     {
-      "type": "person",
+      "type": "tenant",
       "id": "1d27c0ab-9c7b-4738-a2fd-0ca013c4de10"
     }
   ],
   "targets": [
     {
-      "type": "group",
+      "type": "unit",
       "id": "3747a4ab-a385-4215-9084-5c1479019ba6"
     },
     {
-      "type": "person",
+      "type": "tenant",
       "id": "5295a4ab-b456-9385-1056-4a1857492cd7"
     },
     {
-      "type": "virtualGroup",
+      "type": "virtualUnit",
       "list": [
         {
-          "type": "person",
+          "type": "tenant",
           "id": "4df377f2-d6b0-4540-95f7-3fbc949d0015"
         },
         {
-          "type": "person",
+          "type": "tenant",
           "id": "6213111e-741b-43b1-a178-13ab09f62c30"
         }
       ]
@@ -1584,16 +1615,16 @@ POST /match
 ```json
 {
   "source": {
-    "type": "person",
+    "type": "tenant",
     "id": "b601daf0-fe21-4b02-9659-21c426e9b7c7"
   },
   "targets": [
     {
-      "type": "group",
+      "type": "unit",
       "id": "1377a4ab-a385-4215-9084-5c1479019ba6"
     },
     {
-      "type": "group",
+      "type": "unit",
       "id": "7201a4ab-b456-9385-1056-4a1857492vg7"
     }
   ]
@@ -1613,7 +1644,7 @@ POST /match
     },
     {
       "type": "rejected",
-      "message": "There should be no empty source/target. Repeating persons are ignored.",
+      "message": "There should be no empty source/target. Repeating tenants are ignored.",
       "code": "EmptyUnit"
     }
   ]
@@ -1631,17 +1662,17 @@ The best match endpoint enables you to locate the best matching entity across th
 
 * Request fields:
   - `source`: Specifies the single source for matching.
-    - `type`: Type of entity being matched, `person` for a `Person`, `group` for a `Group`, and `virtualGroup` for an object containing a list of persons (This `source` field is identical to the one in the `/match` endpoint)
+    - `type`: Type of entity being matched, `tenant` for a `Tenant`, `unit` for a `Unit`, and `virtualUnit` for an object containing a list of tenants (This `source` field is identical to the one in the `/match` endpoint)
     - `id`: Represents the ID of the entity.
-  - `targetType`: This field specifies the type of entity you want to be included in your best match results. It can be either `person` or `group`.
+  - `targetType`: This field specifies the type of entity you want to be included in your best match results. It can be either `tenant` or `unit`.
 * Response fields:
   - `results`: This field contains an array of match results, presented in descending order from the best match first.
-  - `type`: Indicates the entity type, `group` or `person`. 
-  - `entity`: This field pertains to the entity of the matched item, which can be either a group or a person, as dictated by the type. For the schema of Group and Person entities, refer to the preceding sections.
+  - `type`: Indicates the entity type, `unit` or `tenant`. 
+  - `entity`: This field pertains to the entity of the matched item, which can be either a unit or a tenant, as dictated by the type. For the schema of Unit and Tenant entities, refer to the preceding sections.
   - `score`: The match score.
   
 
-As you may have noted, there are no differences between `resolved` or `rejected` requests - best match will exclusively contain resolved matches. At most, 20 items will be included, but this may be fewer if the system currently lacks a sufficient number of individuals or groups available for matching.
+As you may have noted, there are no differences between `resolved` or `rejected` requests - best match will exclusively contain resolved matches. At most, 20 items will be included, but this may be fewer if the system currently lacks a sufficient number of individuals or units available for matching.
 
 ```http
 POST /match/best
@@ -1653,20 +1684,20 @@ POST /match/best
 
 ```json
 {
-  "source": { "type": "person", "id": "d805cf84-1237-4ffd-bbda-f5d66b09ce72" },
-  "targetType": "group"
+  "source": { "type": "tenant", "id": "d805cf84-1237-4ffd-bbda-f5d66b09ce72" },
+  "targetType": "unit"
 }
 ```
 
 
 
-##### Response example: Returns best matching score for person to groups
+##### Response example: Returns best matching score for tenant to units
 
 ```json
 {
   "results": [
     {
-      "type": "group",
+      "type": "unit",
       "entity": {
         "id": "ce602e65-1c11-4b53-9d68-d4911c5ec4eb",
         "createdAt": "2023-05-19T11:33:58.759Z",
@@ -1679,7 +1710,7 @@ POST /match/best
       "score": 95.02
     },
     {
-      "type": "group",
+      "type": "unit",
       "entity": {
         "id": "02982527-c090-4024-af39-a565b641c466",
         "createdAt": "2023-05-19T11:33:58.827Z",
@@ -1698,14 +1729,14 @@ POST /match/best
 #### Overlap handling<a name="overlap_handling_link"></a>
 <hr style="background: #FE6958; height: 2px">
 
-Overlap handling is implemented for all matching requests. It takes into account situations where some individuals appearing in the source also exist in the target entities. This may happen, for example, when matching an individual with a group in which they are already a member. The default procedure for managing such scenarios involves the following steps:
+Overlap handling is implemented for all matching requests. It takes into account situations where some individuals appearing in the source also exist in the target entities. This may happen, for example, when matching an individual with a unit in which they are already a member. The default procedure for managing such scenarios involves the following steps:
 
-* If the source contains only one person: Any individual with the same ID in the target list is removed before calculating the match result.
+* If the source contains only one tenant: Any individual with the same ID in the target list is removed before calculating the match result.
 * If the target consists of a single entity: Any individual with the same ID in the source list is removed before calculating the match result.
-* If both the source and the target include more than one person: Any individuals in the target list who also appear in the source are removed before calculating the match result.
+* If both the source and the target include more than one tenant: Any individuals in the target list who also appear in the source are removed before calculating the match result.
 * If the overlap handling process results in either the source or the target becoming empty, the matching request will be rejected.
 
-By applying these rules, the overlap handling ensures that the same person doesn't feature in both the source and target when a match is being calculated, thus maintaining the integrity of the matching process.
+By applying these rules, the overlap handling ensures that the same tenant doesn't feature in both the source and target when a match is being calculated, thus maintaining the integrity of the matching process.
 
 
 
@@ -1714,14 +1745,14 @@ By applying these rules, the overlap handling ensures that the same person doesn
 The error codes possible to get from the match endpoint are:
 
 ```
-Person::NotFound
+Tenant::NotFound
 ```
 
 ```
-Group::NotFound
+Unit::NotFound
 ```
 
-These are described in the person and group routes.
+These are described in the tenant and unit routes.
 
 
 
