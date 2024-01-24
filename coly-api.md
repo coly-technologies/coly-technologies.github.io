@@ -1,7 +1,7 @@
 # Coly ME (Match Engine) API documentation
 <hr style="background: #4C53FF; height: 5px">
 
-<h6>Version 1.0</h6>
+<h6>Version 1.18</h6>
 
 
 ### Table of contents
