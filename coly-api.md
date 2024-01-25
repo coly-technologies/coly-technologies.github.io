@@ -1,4 +1,4 @@
-# Coly ME (Match Engine) API documentation
+# Coly API documentation
 <hr style="background: #4C53FF; height: 5px">
 
 <h6>Version 1.18</h6>
@@ -51,9 +51,9 @@
 ## Introduction <a name="intro_link"></a>
 <hr style="background: #4C53FF; height: 4px">
 
-The Coly ME API Documentation provides descriptive information for developers who would like to integrate the functionality of the Coly ME API into their solution.
+The Coly API Documentation provides descriptive information for developers who would like to integrate the functionality of the Coly API into their solution.
 
-The Coly ME engine is provided in four simple steps. 
+The Coly engine is provided in four simple steps. 
 
 1. Create a tenant.
 2. Distribute the link to the tenant for the assessment and profile.
@@ -76,7 +76,6 @@ Our data models have several types(or layers) that define our approach. Simply s
 ```mermaid
 graph LR;
   Unit & Tenant --> Assignment --> Feedback
-  Unit & Tenant <--- Label
   Tenant --> PsychometricTest
 ```
 
