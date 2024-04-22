@@ -1070,8 +1070,6 @@ GET /units
 
 
 
-
-
 ##### Available query options for unit relations:
 
 * include tenants in units with the following query param
