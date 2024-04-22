@@ -311,9 +311,9 @@ Although almost all requests return a 200 status code, there are a few exception
 
 For any of the entities below (`tenant` and `unit`), the following query params are supported when fetching from the backend:
 
-- `pageSize`: The number of records to return per page. This is used for pagination purposes.
-- `pageNumber`: The page number to return. This is used in conjunction with `pageSize` for pagination.
-- `sortDirection`: The sorting direction, either `asc` for ascending or `desc` for descending.
+- `pageSize`: The number of records to return per page. This is used for pagination purposes. This field is mandatory.
+- `pageNumber`: The page number to return. This is used in conjunction with `pageSize` for pagination. This field is mandatory.
+- `sortDirection`: The sorting direction, either `asc` for ascending or `desc` for descending. This is optional, and will default to `asc`.
 
 
 
@@ -1051,30 +1051,24 @@ GET /units
   GET /units?status=empty
   ```
 
-* Units that are **not** empty:
-
-  ````http
-  GET /units?status=!empty
-  ````
-
-* Units with **all** stats and those who has vacancies:
+* Units that are full:
 
   ```http
-  GET /units?status[]=full&status[]=vacant
+  GET /units?status=full
   ```
 
-* Units with **all** stats but excluding `vacant`:
+* Units that are vacant (i.e has one or more tenant, but also one or more available spots)
 
   ```http
-  GET /units?status[]=full&status[]=!vacant
+  GET /units?status=vacant
   ```
 
-  
+* Combinations of these can also be provided, for example:
+  ```http
+  GET /units?status[]=vacant&status[]=empty
+  ```
 
-  **NOTE**: By design in query options `exclusive "!*"` flags are **prioritized**, for example:
-  
-  in the case above we first select all statuses except `vacant` because the order doesn’t matter. And then we go along `inclusive` or normal flags to include desired. So that the result of the last query is the following: “units with all statuses excluding `vacant` but including `full`”. You can also exclude several. Duplications would be ignored.
-  
+
 
 
 
