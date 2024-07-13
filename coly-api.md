@@ -725,8 +725,10 @@ Tenant::NotFound
 When creating a `Tenant` record, the user's email should be unique and not be reused unless the tenant has been removed from the platform:
 
 ```json
-Tenant::EmailUsed
+User::EmailUsed
 ```
+
+(Note that this error is prefixed with `User`, as it applies system-wide to any type of user.)
 
 
 
