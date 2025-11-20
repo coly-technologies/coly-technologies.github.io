@@ -1210,8 +1210,10 @@ DELETE /units/:id
 
 ##### Response example: Unit record deleted
 
-```http
-Status: 204 No content
+```typescript
+{
+  "type": "success",
+}
 ```
 
 
