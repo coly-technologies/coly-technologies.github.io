@@ -187,17 +187,29 @@ The current version of our API is indicated by the `v1` prefix in the base URL. 
 ### Main Response Structure<a name="response_structure_link"></a>
 <hr style="background: #4C53FF; height: 3px">
 
-Our API leverages the Either pattern, a common approach in functional programming, to standardize the structure of all responses. This strategy enables the API to always return a 200 status code, regardless of whether the operation was successful. The outcome of the operation is conveyed in the response's type field, which can be either 'success' or 'failure'.
+Our API uses the Either pattern, a common approach in functional programming, to standardize the structure of all responses. Every successful or failed response will still follow this consistent shape — however, we will return the appropriate HTTP status codes depending on the outcome of the request.
+
+**Summary of status codes:**
+
+- `2xx`: Successful operation
+- `400`: Invalid input (e.g. validation errors)
+- `404`: Resource not found
+- `409`: Logical conflict (e.g. a tenant already assigned, a unit has no vacancies)
+- `401`: Invalid API key
+- `429`: Too many requests
+- `500`: Unintentional system error
+
+> **Note:** Throttling errors (`429`) do not follow the `Either` pattern. They are returned as standard HTTP error responses. Read more in the [throttling](#api_throttler_link) section.
 
 **Note**: While the following example uses TypeScript, the 'Either' pattern is language-agnostic and can be adapted to your preferred programming language:
 
 ```typescript
-interface Success<T> {
+type Success<T> = {
   type: 'success';
   value: T;
 }
 
-interface Failure<E> {
+type Failure<E> = {
   type: 'failure';
   value: E;
 }
@@ -219,18 +231,23 @@ In every response, you'll find the data property structured as one of the follow
 // Failed response:
 {
     "type": "failure",
-    "value": { ... } // Error data
+    "value": {
+        "code": string,
+        "message": string,
+        "status": number
+    }
 }
 ```
 
 
 
-The value of a successfull response will vary across different requests, but all error messages will conform to this structure:
+The value of a successful response will vary across different requests, but all error messages will conform to this structure:
 
 ```typescript
-interface Error {
+type FailureValue = {
 	code: FailCode;
 	message: string;
+  status: number;
 }
 ```
 
@@ -273,7 +290,8 @@ GET http://localhost:7001/v1/tenants/abdca582-43d1-4dd8-f652-ad63451a75ad
     "type": "failure",
     "value": {
         "code": "Tenant::NotFound",
-        "message": "Specified tenant record wasn't found."
+        "message": "Specified tenant record wasn't found.",
+        "status": 404
     }
 }
 ```
@@ -287,7 +305,8 @@ One common FailCode for all requests is `InputValidation::Failed`, which signifi
     "type": "failure",
     "value": {
         "code": "InputValidation::Failed",
-        "message": "[Description of the validation fail]"
+        "message": "[Description of the validation fail]",
+        "status": 400
     }
 }
 ```
@@ -295,12 +314,6 @@ One common FailCode for all requests is `InputValidation::Failed`, which signifi
 
 
 For the remainder of this API documentation, we will describe the structure of the 'value' field and the potential FailCodes for each request.
-
-Although almost all requests return a 200 status code, there are a few exceptions:
-
-- `404`: The requested route doesn't exist.
-- `401`: The provided API key is invalid.
-- `500`: A system error occurred on our side. This is unintentional and will be addressed promptly. If this happens please get in touch with the team at Coly.
 
 
 
@@ -353,9 +366,9 @@ POST /tenants
 
 ```json
 {
-  "email": "james.bond@mymail.com",
-  "lastname": "Bond",
-  "firstname": "James"
+  "email": "john.smith@mymail.com",
+  "lastname": "Smith",
+  "firstname": "John"
 }
 ```
 
@@ -372,9 +385,9 @@ POST /tenants
   "updatedBy": "72d6943c-2b64-43bf-8c38-93c83dc4edab",
   "archivedAt": null,
   "archivedBy": null,
-  "firstname": "James",
-  "lastname": "Bond",
-  "email": "james.bond@mymail.com",
+  "firstname": "John",
+  "lastname": "Smith",
+  "email": "john.smith@mymail.com",
   "gender": null,
   "language": null,
   "country": null,
@@ -746,16 +759,6 @@ For non-archived records, you would have to archive the record first to disable/
 
 ```json
 Tenant::ArchiveStatusRequired
-```
-
-
-
-##### Unknown
-
-If there is a case of an unknown `Error`, there is a high chance of server-side error. Contact us through our email [dev@coly.io](mailto:dev@coly.io) with detailed information about the error:
-
-```json
-Tenant::Unknown
 ```
 
 
@@ -1266,16 +1269,6 @@ Unit::NotEmpty
 
 
 
-##### Unknown
-
-If there is a case of an unknown Error, there is a high chance of server-side error. Contact us through email at [dev@coly.io](mailto:dev@coly.io) with detailed information about the error:
-
-```json
-Unit::Unknown
-```
-
-
-
 
 
 ### Assignments<a name="api_assignments_link"></a>
@@ -1753,17 +1746,11 @@ These are described in the tenant and unit routes.
 
 ### Throttling<a name="api_throttler_link"></a>
 <hr style="background: #4C53FF; height: 4px">
+To ensure fair usage and system stability, the Coly API enforces rate limits on all clients.
 
-In the context of the API, there's a throttler mechanism that enforces rate limits on the number of requests a client can make to ensure that the API remains responsive and available for all clients and to prevent one client from monopolizing the resources of the API.
+If you exceed the allowed number of requests, the API will respond with a 429 Too Many Requests status. The `Retry-After` response header will indicate how many seconds is required to wait before making another request.
 
-
-When a client exceeds the rate limit, the API will return a 429 error to indicate that the client has exceeded its allowed number of requests. The client should wait a certain amount of time before retrying the request. The duration of the waiting time is included in the response headers in the form of the 'Retry-After' header.
-
-```
-A 429 error, also known as a "Too Many Requests" error, is an HTTP status code that indicates that the user has sent too many requests in a given amount of time. This type of error is typically used to prevent a client from overwhelming a server with too many requests in a short period of time.
-```
-
-
+This mechanism prevents individual clients from overloading the system and helps maintain consistent performance for all users.
 
 
 
